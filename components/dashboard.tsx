@@ -1,7 +1,7 @@
-﻿"use client"
+"use client"
 
 import { useState } from "react"
-import { patients, type Patient } from "@/lib/clinic-data"
+import { patients, type GeneratedAction, type Patient } from "@/lib/clinic-data"
 import { Sidebar } from "@/components/sidebar"
 import { Topbar } from "@/components/topbar"
 import { KpiCards } from "@/components/kpi-cards"
@@ -14,6 +14,19 @@ import { ExportCard } from "@/components/export-card"
 
 export function Dashboard() {
   const [selected, setSelected] = useState<Patient>(patients[0])
+  const [sentPlan, setSentPlan] = useState<{
+    actions: GeneratedAction[]
+    patientName: string
+    sentAt: Date
+  } | null>(null)
+
+  function handlePlanSent(actions: GeneratedAction[]) {
+    setSentPlan({
+      actions,
+      patientName: selected.name,
+      sentAt: new Date(),
+    })
+  }
 
   return (
     <div className="min-h-screen bg-[#F7F7F8] text-foreground">
@@ -28,7 +41,7 @@ export function Dashboard() {
 
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_0.9fr]">
               <AiSummary patient={selected} />
-              <MobilePreview />
+              <MobilePreview sentPlan={sentPlan} />
             </div>
 
             <section className="grid grid-cols-1 items-start gap-6 2xl:grid-cols-[1.45fr_0.8fr]">
@@ -39,7 +52,7 @@ export function Dashboard() {
             </section>
 
             <div className="grid grid-cols-1 gap-6">
-              <PlanComposer />
+              <PlanComposer patient={selected} onPlanSent={handlePlanSent} />
             </div>
 
             <ExportCard patient={selected} />

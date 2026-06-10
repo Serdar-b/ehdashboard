@@ -1,8 +1,20 @@
-﻿"use client"
+"use client"
 
 import { useState } from "react"
-import { Sparkles, Loader2, Pill, Footprints, HeartPulse } from "lucide-react"
-import { generatedPlan, type GeneratedAction } from "@/lib/clinic-data"
+import {
+  CheckCircle2,
+  Footprints,
+  HeartPulse,
+  Loader2,
+  Pill,
+  Send,
+  Sparkles,
+} from "lucide-react"
+import type { GeneratedAction, Patient } from "@/lib/clinic-data"
+import {
+  createSendConfirmation,
+  generatePlanFromDoctorNote,
+} from "@/lib/ai-demo"
 import { cn } from "@/lib/utils"
 
 const example =
@@ -16,18 +28,37 @@ const priorityStyle: Record<GeneratedAction["priority"], string> = {
 
 const icons = [Pill, Footprints, HeartPulse]
 
-export function PlanComposer() {
+type PlanComposerProps = {
+  patient: Patient
+  onPlanSent: (actions: GeneratedAction[]) => void
+}
+
+export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
   const [note, setNote] = useState(example)
   const [loading, setLoading] = useState(false)
   const [generated, setGenerated] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [confirmation, setConfirmation] = useState("")
+  const [actions, setActions] = useState<GeneratedAction[]>([])
 
   function handleGenerate() {
     setLoading(true)
     setGenerated(false)
+    setSent(false)
+    setConfirmation("")
+
     setTimeout(() => {
+      const result = generatePlanFromDoctorNote(note)
+      setActions(result.actions)
       setLoading(false)
       setGenerated(true)
     }, 900)
+  }
+
+  function handleSend() {
+    onPlanSent(actions)
+    setConfirmation(createSendConfirmation(patient, actions))
+    setSent(true)
   }
 
   return (
@@ -51,7 +82,7 @@ export function PlanComposer() {
         onChange={(e) => setNote(e.target.value)}
         rows={3}
         className="w-full resize-none rounded-xl border border-[#EEE9E4] bg-[#FBFAF8] p-4 text-sm leading-relaxed text-[#27221F] outline-none placeholder:text-[#A59D97] focus-visible:border-[#078C7A] focus-visible:ring-4 focus-visible:ring-[#078C7A]/10"
-        placeholder="Skriv eller klistra in läkaranteckning…"
+        placeholder="Skriv eller klistra in läkaranteckning..."
         aria-label="Läkaranteckning"
       />
 
@@ -65,19 +96,19 @@ export function PlanComposer() {
         ) : (
           <Sparkles className="size-4" />
         )}
-        {loading ? "Genererar…" : "Generera vårdplan"}
+        {loading ? "Genererar..." : "Generera vårdplan"}
       </button>
 
       <div
         className={cn(
           "mt-4 space-y-2 transition-opacity",
-          generated ? "opacity-100" : "opacity-100",
+          generated ? "opacity-100" : "opacity-60",
         )}
       >
         <p className="text-xs font-medium text-muted-foreground">
           Genererade strukturerade åtgärder
         </p>
-        {generatedPlan.map((action, i) => {
+        {(generated ? actions : []).map((action, i) => {
           const Icon = icons[i % icons.length]
           return (
             <div
@@ -106,6 +137,33 @@ export function PlanComposer() {
             </div>
           )
         })}
+
+        {generated ? (
+          <div className="mt-4 flex flex-col gap-3 rounded-xl border border-[#BCE9E2] bg-[#F0FAF8] p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-[#078C7A]">
+                {sent ? "Plan skickad till patientappen" : "Plan redo att skickas"}
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-[#3C6761]">
+                {sent
+                  ? confirmation
+                  : `${actions.length} åtgärder kan nu skickas till ${patient.name}s app.`}
+              </p>
+            </div>
+            <button
+              onClick={handleSend}
+              disabled={sent}
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#078C7A] px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:bg-[#DDF4F1] disabled:text-[#078C7A]"
+            >
+              {sent ? (
+                <CheckCircle2 className="size-4" />
+              ) : (
+                <Send className="size-4" />
+              )}
+              {sent ? "Skickad" : "Skicka till patientapp"}
+            </button>
+          </div>
+        ) : null}
       </div>
     </section>
   )

@@ -2,10 +2,19 @@
 
 import { useState } from "react"
 import { ImageIcon } from "lucide-react"
+import type { GeneratedAction } from "@/lib/clinic-data"
 
 const previewImageSrc = "/patient-app-preview.png"
 
-export function MobilePreview() {
+type MobilePreviewProps = {
+  sentPlan: {
+    actions: GeneratedAction[]
+    patientName: string
+    sentAt: Date
+  } | null
+}
+
+export function MobilePreview({ sentPlan }: MobilePreviewProps) {
   const [imageMissing, setImageMissing] = useState(false)
 
   return (
@@ -17,6 +26,12 @@ export function MobilePreview() {
         <h2 className="mt-1 text-sm font-semibold text-foreground">
           Så visas planen i mobilappen
         </h2>
+        {sentPlan ? (
+          <div className="mx-auto mt-3 inline-flex items-center gap-2 rounded-full border border-[#BCE9E2] bg-[#F0FAF8] px-3 py-1.5 text-xs font-semibold text-[#078C7A]">
+            <span className="size-1.5 rounded-full bg-[#078C7A]" />
+            Patientappen uppdaterad med {sentPlan.actions.length} åtgärder
+          </div>
+        ) : null}
       </div>
 
       <div className="mt-5 flex flex-1 items-center justify-center">
@@ -31,7 +46,9 @@ export function MobilePreview() {
             <p className="mt-2 text-xs leading-5 text-[#817771]">
               Spara din mobilskärmbild som
               <br />
-              <span className="font-mono text-[#27221F]">public/patient-app-preview.png</span>
+              <span className="font-mono text-[#27221F]">
+                public/patient-app-preview.png
+              </span>
             </p>
           </div>
         ) : (
