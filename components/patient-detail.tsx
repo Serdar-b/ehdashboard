@@ -1,4 +1,4 @@
-import { AlertTriangle, Brain, TrendingDown, TrendingUp, ShieldCheck } from "lucide-react"
+﻿import { AlertTriangle, Brain, TrendingDown, TrendingUp, ShieldCheck } from "lucide-react"
 import type { Patient } from "@/lib/clinic-data"
 import { StatusBadge } from "@/components/status-badge"
 import { Sparkline } from "@/components/sparkline"
@@ -27,10 +27,10 @@ export function PatientDetail({ patient }: { patient: Patient }) {
   const trendUp = patient.weekAdherence.at(-1)! >= patient.weekAdherence.at(-2)!
 
   return (
-    <aside className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-5">
+    <aside className="flex flex-col gap-5 rounded-xl bg-white p-6 shadow-[0_16px_38px_rgba(59,42,32,0.035)]">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="flex size-12 items-center justify-center rounded-full bg-secondary text-sm font-semibold text-secondary-foreground">
+          <span className="flex size-12 items-center justify-center rounded-full bg-[#DDF4F1] text-sm font-semibold text-[#078C7A]">
             {patient.initials}
           </span>
           <div className="leading-tight">
@@ -86,7 +86,7 @@ export function PatientDetail({ patient }: { patient: Patient }) {
           {patient.missedActions.map((a) => (
             <li
               key={a}
-              className="flex items-center gap-2.5 rounded-lg bg-muted/50 px-3 py-2 text-xs text-foreground"
+              className="flex items-center gap-2.5 rounded-lg bg-[#FBFAF8] px-3 py-2 text-xs text-[#27221F]"
             >
               <span
                 className={`size-1.5 shrink-0 rounded-full ${dotTone[patient.signal]}`}
@@ -98,7 +98,7 @@ export function PatientDetail({ patient }: { patient: Patient }) {
         </ul>
       </div>
 
-      <div className="rounded-xl bg-muted/40 px-3.5 py-3">
+      <div className="rounded-xl bg-[#FBFAF8] px-3.5 py-3">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Beteendefriktion
         </p>
@@ -109,7 +109,7 @@ export function PatientDetail({ patient }: { patient: Patient }) {
         </p>
       </div>
 
-      <div className="rounded-xl border border-info/20 bg-info-muted/40 p-3.5">
+      <div className="rounded-xl border border-[#BCE9E2] bg-[#F0FAF8] p-3.5">
         <div className="mb-1.5 flex items-center gap-1.5">
           <Brain className="size-4 text-info" />
           <p className="text-xs font-semibold uppercase tracking-wide text-info">

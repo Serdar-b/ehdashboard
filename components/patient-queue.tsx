@@ -1,6 +1,6 @@
-"use client"
+﻿"use client"
 
-import { ChevronRight } from "lucide-react"
+import { MoreHorizontal, Search } from "lucide-react"
 import { patients, type Patient } from "@/lib/clinic-data"
 import { StatusBadge } from "@/components/status-badge"
 import { cn } from "@/lib/utils"
@@ -19,31 +19,48 @@ export function PatientQueue({
   onSelect: (p: Patient) => void
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-border bg-card">
-      <div className="flex items-center justify-between gap-3 px-5 py-4">
+    <section className="overflow-hidden rounded-xl bg-white p-6 shadow-[0_16px_38px_rgba(59,42,32,0.035)]">
+      <div className="mb-5 flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-sm font-semibold text-foreground">
+          <h2 className="text-[22px] font-bold tracking-tight text-[#27221F]">
             Prioriterad patientkö
           </h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">
+          <p className="mt-1 text-sm text-[#817771]">
             Sorterad efter klinisk signal och följsamhet
           </p>
         </div>
-        <span className="shrink-0 rounded-full bg-coral-muted px-3 py-1 text-xs font-medium text-coral">
-          12 att granska
-        </span>
+        <div className="relative hidden w-[280px] md:block">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#A59D97]" />
+          <input
+            className="h-9 w-full rounded-lg border border-[#EEE9E4] bg-white pl-9 pr-3 text-sm outline-none placeholder:text-[#A59D97] focus:border-[#078C7A]"
+            placeholder="Sök"
+            type="search"
+          />
+        </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[760px] border-collapse text-sm">
+      <div className="overflow-hidden">
+        <table className="w-full table-fixed border-collapse text-sm">
+          <colgroup>
+            <col className="w-10" />
+            <col className="w-[28%]" />
+            <col className="w-[15%]" />
+            <col className="w-[16%]" />
+            <col className="w-[17%]" />
+            <col />
+            <col className="w-9" />
+          </colgroup>
           <thead>
-            <tr className="border-y border-border bg-muted/30 text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-              <th className="px-5 py-2.5 font-medium">Patient</th>
-              <th className="px-4 py-2.5 font-medium">Signal</th>
-              <th className="px-4 py-2.5 font-medium">Följsamhet</th>
-              <th className="px-4 py-2.5 font-medium">Senaste incheckning</th>
-              <th className="px-4 py-2.5 font-medium">Föreslagen åtgärd</th>
-              <th className="px-5 py-2.5 font-medium text-right">
+            <tr className="border-y border-[#EEE9E4] bg-[#FBFAF8] text-left text-xs text-[#27221F]">
+              <th className="w-10 px-3 py-3 font-semibold">
+                <span className="block size-4 rounded border border-[#DED6CF]" />
+              </th>
+              <th className="px-3 py-3 font-semibold">Patient</th>
+              <th className="px-4 py-3 font-semibold">Signal</th>
+              <th className="px-4 py-3 font-semibold">Följsamhet</th>
+              <th className="px-4 py-3 font-semibold">Senaste incheckning</th>
+              <th className="px-4 py-3 font-semibold">Föreslagen åtgärd</th>
+              <th className="px-3 py-3 font-semibold text-right">
                 <span className="sr-only">Granska</span>
               </th>
             </tr>
@@ -56,26 +73,34 @@ export function PatientQueue({
                   key={p.id}
                   onClick={() => onSelect(p)}
                   className={cn(
-                    "cursor-pointer border-b border-border transition-colors last:border-0",
-                    selected
-                      ? "bg-info-muted/40"
-                      : "hover:bg-muted/50",
+                    "cursor-pointer border-b border-[#EEE9E4] transition-colors last:border-0",
+                    selected ? "bg-[#F0FAF8]" : "hover:bg-[#FBFAF8]",
                   )}
                 >
-                  <td className="relative px-5 py-3.5">
+                  <td className="px-3 py-3.5">
+                    <span
+                      className={cn(
+                        "block size-4 rounded border",
+                        selected
+                          ? "border-[#078C7A] bg-[#078C7A]"
+                          : "border-[#DED6CF] bg-white",
+                      )}
+                    />
+                  </td>
+                  <td className="relative px-3 py-3.5">
                     {selected && (
                       <span
-                        className="absolute inset-y-0 left-0 w-0.5 bg-info"
+                        className="absolute inset-y-0 left-0 w-0.5 bg-[#078C7A]"
                         aria-hidden
                       />
                     )}
                     <div className="flex items-center gap-3">
-                      <span className="flex size-9 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">
+                      <span className="flex size-8 items-center justify-center rounded-full bg-[#DDF4F1] text-xs font-semibold text-[#078C7A]">
                         {p.initials}
                       </span>
                       <div className="leading-tight">
-                        <p className="font-medium text-foreground">{p.name}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="truncate font-semibold text-[#27221F]">{p.name}</p>
+                        <p className="truncate text-xs text-[#817771]">
                           {p.age} år · {p.program}
                         </p>
                       </div>
@@ -100,24 +125,14 @@ export function PatientQueue({
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-3.5 text-muted-foreground">
+                  <td className="px-4 py-3.5 text-[#817771]">
                     {p.lastCheckIn}
                   </td>
-                  <td className="px-4 py-3.5 text-foreground">
+                  <td className="px-4 py-3.5 font-medium leading-5 text-[#27221F]">
                     {p.suggestedAction}
                   </td>
-                  <td className="px-5 py-3.5 text-right">
-                    <span
-                      className={cn(
-                        "inline-flex items-center justify-center rounded-lg p-1.5 transition-colors",
-                        selected
-                          ? "text-info"
-                          : "text-muted-foreground",
-                      )}
-                      aria-hidden
-                    >
-                      <ChevronRight className="size-4" />
-                    </span>
+                  <td className="px-3 py-3.5 text-right">
+                    <MoreHorizontal className="ml-auto size-5 text-[#817771]" />
                   </td>
                 </tr>
               )

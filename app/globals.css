@@ -61,29 +61,27 @@
 }
 
 :root {
-  /* Warm off-white canvas, dark ink text */
-  --background: oklch(0.982 0.006 85);
-  --foreground: oklch(0.245 0.012 255);
+  --background: oklch(0.975 0.004 80);
+  --foreground: oklch(0.22 0.015 55);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.245 0.012 255);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.245 0.012 255);
-  /* Dark ink primary */
-  --primary: oklch(0.28 0.018 255);
-  --primary-foreground: oklch(0.985 0.005 85);
-  --secondary: oklch(0.955 0.008 85);
-  --secondary-foreground: oklch(0.3 0.015 255);
-  --muted: oklch(0.96 0.006 85);
-  --muted-foreground: oklch(0.52 0.012 255);
-  --accent: oklch(0.955 0.008 85);
-  --accent-foreground: oklch(0.3 0.015 255);
+  --primary: oklch(0.57 0.115 174);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.955 0.009 80);
+  --secondary-foreground: oklch(0.28 0.018 55);
+  --muted: oklch(0.955 0.008 80);
+  --muted-foreground: oklch(0.52 0.016 55);
+  --accent: oklch(0.94 0.032 174);
+  --accent-foreground: oklch(0.38 0.09 174);
   --destructive: oklch(0.62 0.19 25);
-  --border: oklch(0.91 0.008 85);
-  --input: oklch(0.91 0.008 85);
-  --ring: oklch(0.6 0.11 215);
+  --border: oklch(0.92 0.012 255);
+  --input: oklch(0.92 0.012 255);
+  --ring: oklch(0.57 0.115 174);
 
   /* Clinical signal palette */
-  --teal: oklch(0.62 0.085 190);
+  --teal: oklch(0.57 0.115 174);
   --teal-foreground: oklch(0.99 0.005 85);
   --teal-muted: oklch(0.95 0.03 190);
   --amber: oklch(0.76 0.13 75);
@@ -92,7 +90,7 @@
   --coral: oklch(0.62 0.19 25);
   --coral-foreground: oklch(0.99 0.005 85);
   --coral-muted: oklch(0.95 0.04 25);
-  --info: oklch(0.6 0.11 250);
+  --info: oklch(0.57 0.115 174);
   --info-foreground: oklch(0.99 0.005 85);
   --info-muted: oklch(0.95 0.035 250);
 
@@ -101,16 +99,16 @@
   --chart-3: oklch(0.76 0.13 75);
   --chart-4: oklch(0.62 0.19 25);
   --chart-5: oklch(0.52 0.012 255);
-  --radius: 0.625rem;
+  --radius: 0.875rem;
 
-  --sidebar: oklch(0.255 0.014 255);
-  --sidebar-foreground: oklch(0.86 0.01 255);
-  --sidebar-primary: oklch(0.62 0.085 190);
-  --sidebar-primary-foreground: oklch(0.99 0.005 85);
-  --sidebar-accent: oklch(0.32 0.018 255);
-  --sidebar-accent-foreground: oklch(0.97 0.005 85);
-  --sidebar-border: oklch(0.34 0.016 255);
-  --sidebar-ring: oklch(0.62 0.085 190);
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.32 0.018 55);
+  --sidebar-primary: oklch(0.57 0.115 174);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.94 0.032 174);
+  --sidebar-accent-foreground: oklch(0.38 0.09 174);
+  --sidebar-border: oklch(0.93 0.012 255);
+  --sidebar-ring: oklch(0.57 0.115 174);
 }
 
 .dark {
@@ -156,5 +154,10 @@
   }
   html {
     @apply font-sans;
+  }
+  button,
+  input,
+  textarea {
+    letter-spacing: 0;
   }
 }

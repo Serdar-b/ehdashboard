@@ -1,11 +1,23 @@
-﻿const config = [
+﻿import js from "@eslint/js";
+import tseslint from "typescript-eslint";
+
+export default tseslint.config(
   {
     ignores: [".next/**", "node_modules/**", "out/**", "next-env.d.ts"],
   },
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
   {
-    files: ["**/*.{js,jsx,ts,tsx}"],
-    rules: {},
+    files: ["**/*.{ts,tsx}"],
+    languageOptions: {
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+    },
+    rules: {
+      "@typescript-eslint/no-unused-vars": "warn",
+    },
   },
-];
-
-export default config;
+);

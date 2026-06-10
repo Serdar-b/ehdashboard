@@ -2,9 +2,9 @@ import { cn } from "@/lib/utils"
 import type { Signal } from "@/lib/clinic-data"
 
 const styles: Record<Signal, string> = {
-  Stabil: "bg-teal-muted text-teal border-teal/30",
-  Bevaka: "bg-amber-muted text-amber-foreground border-amber/40",
-  Kritisk: "bg-coral-muted text-coral border-coral/30",
+  Stabil: "bg-[#DDF4F1] text-[#078C7A] border-[#BCE9E2]",
+  Bevaka: "bg-[#FFF0C7] text-[#9A4B22] border-[#F7D982]",
+  Kritisk: "bg-[#F8D8CC] text-[#D94E25] border-[#F0B7A2]",
 }
 
 const dot: Record<Signal, string> = {
@@ -23,7 +23,7 @@ export function StatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium",
+        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium",
         styles[signal],
         className,
       )}

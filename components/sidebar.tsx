@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import {
   LayoutDashboard,
@@ -7,7 +7,8 @@ import {
   Sparkles,
   FileOutput,
   Settings,
-  Activity,
+  ShieldCheck,
+  LogOut,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -22,48 +23,44 @@ const nav = [
 
 export function Sidebar() {
   return (
-    <aside className="hidden w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar lg:flex">
-      <div className="flex h-16 items-center gap-2.5 border-b border-sidebar-border px-5">
-        <div className="flex size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-          <Activity className="size-4.5" />
+    <aside className="hidden w-[256px] shrink-0 flex-col border-r border-[#EEE9E4] bg-white lg:flex">
+      <div className="flex h-20 items-center gap-3 px-6">
+        <div className="flex size-10 items-center justify-center rounded-full bg-[#078C7A] text-white shadow-sm">
+          <ShieldCheck className="size-5" />
         </div>
         <div className="leading-tight">
-          <p className="text-sm font-semibold text-sidebar-foreground">
+          <p className="text-base font-bold text-[#27221F]">
             Executive Health
           </p>
-          <p className="text-[11px] text-sidebar-foreground/55">
+          <p className="text-[11px] font-medium text-[#817771]">
             Klinisk uppföljning
           </p>
         </div>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-0.5 p-3">
+      <nav className="flex flex-1 flex-col gap-3 px-5 pt-3">
         {nav.map((item) => (
           <button
             key={item.label}
             className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+              "flex h-11 items-center gap-3 rounded-xl px-4 text-sm font-medium transition-colors",
               item.active
-                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
+                ? "bg-[#DDF4F1] text-[#078C7A]"
+                : "text-[#635C57] hover:bg-[#F7F7F8] hover:text-[#27221F]",
             )}
             aria-current={item.active ? "page" : undefined}
           >
-            <item.icon className="size-4.5 shrink-0" />
+            <item.icon className="size-4.5 shrink-0 stroke-[1.8]" />
             {item.label}
           </button>
         ))}
       </nav>
 
-      <div className="m-3 rounded-xl border border-sidebar-border bg-sidebar-accent/40 p-3.5">
-        <div className="flex items-center gap-2 text-sidebar-foreground">
-          <Sparkles className="size-4 text-sidebar-primary" />
-          <span className="text-xs font-semibold">AI-triage aktiv</span>
-        </div>
-        <p className="mt-1.5 text-[11px] leading-relaxed text-sidebar-foreground/60">
-          172 patienter granskades automatiskt idag. 12 lyftes för klinisk
-          bedömning.
-        </p>
+      <div className="px-5 pb-6">
+        <button className="flex h-11 items-center gap-3 rounded-xl px-4 text-sm font-medium text-[#635C57] transition-colors hover:bg-[#F7F7F8] hover:text-[#27221F]">
+          <LogOut className="size-4.5 stroke-[1.8]" />
+          Logga ut
+        </button>
       </div>
     </aside>
   )

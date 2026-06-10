@@ -1,4 +1,4 @@
-export type Signal = "Stabil" | "Bevaka" | "Kritisk"
+﻿export type Signal = "Stabil" | "Bevaka" | "Kritisk"
 
 export type Patient = {
   id: string
