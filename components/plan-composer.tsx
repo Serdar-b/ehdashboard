@@ -15,6 +15,7 @@ import {
   createSendConfirmation,
   generatePlanFromDoctorNote,
 } from "@/lib/ai-demo"
+import { saveGeneratedPlan } from "@/lib/supabase/protocol"
 import { cn } from "@/lib/utils"
 
 const example =
@@ -38,13 +39,16 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
   const [loading, setLoading] = useState(false)
   const [generated, setGenerated] = useState(false)
   const [sent, setSent] = useState(false)
+  const [sending, setSending] = useState(false)
   const [confirmation, setConfirmation] = useState("")
+  const [error, setError] = useState("")
   const [actions, setActions] = useState<GeneratedAction[]>([])
 
   function handleGenerate() {
     setLoading(true)
     setGenerated(false)
     setSent(false)
+    setError("")
     setConfirmation("")
 
     setTimeout(() => {
@@ -55,10 +59,21 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
     }, 900)
   }
 
-  function handleSend() {
-    onPlanSent(actions)
-    setConfirmation(createSendConfirmation(patient, actions))
-    setSent(true)
+  async function handleSend() {
+    setSending(true)
+    setError("")
+
+    try {
+      await saveGeneratedPlan({ patient, note, actions })
+      onPlanSent(actions)
+      setConfirmation(createSendConfirmation(patient, actions))
+      setSent(true)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Okänt Supabase-fel."
+      setError(message)
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
@@ -149,18 +164,25 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                   ? confirmation
                   : `${actions.length} åtgärder kan nu skickas till ${patient.name}s app.`}
               </p>
+              {error ? (
+                <p className="mt-2 text-xs font-medium leading-relaxed text-coral">
+                  {error}
+                </p>
+              ) : null}
             </div>
             <button
               onClick={handleSend}
-              disabled={sent}
+              disabled={sent || sending}
               className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#078C7A] px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:bg-[#DDF4F1] disabled:text-[#078C7A]"
             >
-              {sent ? (
+              {sending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : sent ? (
                 <CheckCircle2 className="size-4" />
               ) : (
                 <Send className="size-4" />
               )}
-              {sent ? "Skickad" : "Skicka till patientapp"}
+              {sending ? "Skickar..." : sent ? "Skickad" : "Skicka till patientapp"}
             </button>
           </div>
         ) : null}
