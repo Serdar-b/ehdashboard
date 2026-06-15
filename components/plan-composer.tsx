@@ -11,10 +11,8 @@ import {
   Sparkles,
 } from "lucide-react"
 import type { GeneratedAction, Patient } from "@/lib/clinic-data"
-import {
-  createSendConfirmation,
-  generatePlanFromDoctorNote,
-} from "@/lib/ai-demo"
+import { createSendConfirmation } from "@/lib/ai-demo"
+import { generateCarePlanWithAi } from "@/lib/supabase/ai"
 import { saveGeneratedPlan } from "@/lib/supabase/protocol"
 import { cn } from "@/lib/utils"
 
@@ -44,19 +42,26 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
   const [error, setError] = useState("")
   const [actions, setActions] = useState<GeneratedAction[]>([])
 
-  function handleGenerate() {
+  async function handleGenerate() {
     setLoading(true)
     setGenerated(false)
     setSent(false)
     setError("")
     setConfirmation("")
 
-    setTimeout(() => {
-      const result = generatePlanFromDoctorNote(note)
-      setActions(result.actions)
+    try {
+      const plan = await generateCarePlanWithAi({ note, patient })
+      setActions(plan.actions)
       setLoading(false)
       setGenerated(true)
-    }, 900)
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Kunde inte generera vårdplan med AI-funktionen."
+      setError(message)
+      setLoading(false)
+    }
   }
 
   async function handleSend() {
@@ -114,16 +119,18 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
         {loading ? "Genererar..." : "Generera vårdplan"}
       </button>
 
-      <div
-        className={cn(
-          "mt-4 space-y-2 transition-opacity",
-          generated ? "opacity-100" : "opacity-60",
-        )}
-      >
+      {error && !generated ? (
+        <p className="mt-3 rounded-xl bg-coral-muted px-3 py-2 text-xs font-medium leading-relaxed text-coral">
+          {error}
+        </p>
+      ) : null}
+
+      {generated ? (
+      <div className="mt-4 space-y-2 transition-opacity">
         <p className="text-xs font-medium text-muted-foreground">
           Genererade strukturerade åtgärder
         </p>
-        {(generated ? actions : []).map((action, i) => {
+        {actions.map((action, i) => {
           const Icon = icons[i % icons.length]
           return (
             <div
@@ -187,6 +194,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
           </div>
         ) : null}
       </div>
+      ) : null}
     </section>
   )
 }
