@@ -19,6 +19,8 @@ export type Patient = {
 }
 
 export type LiveAdherence = {
+  activePlanTitle: string
+  sentToAppAt: string | null
   adherence: number
   missedActions: string[]
   missedHighValue: string

@@ -8,6 +8,12 @@ type CarePlanActionRow = {
   sort_order: number
 }
 
+type CarePlanRow = {
+  id: string
+  title: string
+  sent_to_app_at: string | null
+}
+
 type CheckInRow = {
   action_id: string
   completed: boolean
@@ -104,7 +110,7 @@ export async function fetchLiveAdherence(patientId: string): Promise<LiveAdheren
 
   const { data: carePlan, error: carePlanError } = await supabase
     .from("care_plans")
-    .select("id")
+    .select("id,title,sent_to_app_at")
     .eq("patient_id", patientId)
     .eq("status", "active")
     .order("sent_to_app_at", { ascending: false, nullsFirst: false })
@@ -113,11 +119,12 @@ export async function fetchLiveAdherence(patientId: string): Promise<LiveAdheren
 
   if (carePlanError) throw carePlanError
   if (!carePlan) return null
+  const activePlan = carePlan as CarePlanRow
 
   const { data: actions, error: actionsError } = await supabase
     .from("care_plan_actions")
     .select("id,title,priority,sort_order")
-    .eq("care_plan_id", carePlan.id)
+    .eq("care_plan_id", activePlan.id)
     .eq("status", "active")
     .order("sort_order", { ascending: true })
 
@@ -156,6 +163,8 @@ export async function fetchLiveAdherence(patientId: string): Promise<LiveAdheren
   const suggestedAction = createRecommendation(signal, missedActions)
 
   return {
+    activePlanTitle: activePlan.title,
+    sentToAppAt: activePlan.sent_to_app_at,
     adherence,
     missedActions,
     missedHighValue:
