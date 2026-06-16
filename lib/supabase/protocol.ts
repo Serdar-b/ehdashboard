@@ -57,6 +57,11 @@ export async function saveGeneratedPlan({
     title: action.title,
     cadence: action.cadence,
     priority: action.priority,
+    category: action.category,
+    estimated_minutes: action.estimatedMinutes,
+    clinical_weight: action.clinicalWeight,
+    patient_reason: action.patientReason,
+    verification_method: action.verificationMethod,
     status: "active",
     sort_order: index,
   }))
@@ -65,7 +70,35 @@ export async function saveGeneratedPlan({
     .from("care_plan_actions")
     .insert(rows)
 
-  if (actionsError) throw actionsError
+  if (actionsError) {
+    const message = actionsError.message.toLowerCase()
+
+    if (
+      message.includes("category") ||
+      message.includes("estimated_minutes") ||
+      message.includes("clinical_weight") ||
+      message.includes("patient_reason") ||
+      message.includes("verification_method")
+    ) {
+      const fallbackRows = actions.map((action, index) => ({
+        care_plan_id: carePlan.id,
+        patient_id: patient.id,
+        doctor_note_id: doctorNote.id,
+        title: action.title,
+        cadence: action.cadence,
+        priority: action.priority,
+        status: "active",
+        sort_order: index,
+      }))
+      const { error: fallbackError } = await supabase
+        .from("care_plan_actions")
+        .insert(fallbackRows)
+
+      if (fallbackError) throw fallbackError
+    } else {
+      throw actionsError
+    }
+  }
 
   return {
     carePlanId: carePlan.id as string,

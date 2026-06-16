@@ -1,7 +1,7 @@
 ﻿"use client"
 
 import { MoreHorizontal, Search } from "lucide-react"
-import { patients, type Patient } from "@/lib/clinic-data"
+import type { Patient } from "@/lib/clinic-data"
 import { StatusBadge } from "@/components/status-badge"
 import { cn } from "@/lib/utils"
 
@@ -12,9 +12,11 @@ function adherenceColor(v: number) {
 }
 
 export function PatientQueue({
+  patients,
   selectedId,
   onSelect,
 }: {
+  patients: Patient[]
   selectedId: string
   onSelect: (p: Patient) => void
 }) {

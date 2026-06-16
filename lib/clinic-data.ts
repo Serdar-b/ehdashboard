@@ -18,6 +18,20 @@ export type Patient = {
   aiRecommendation: string
 }
 
+export type LiveAdherence = {
+  adherence: number
+  missedActions: string[]
+  missedHighValue: string
+  lastCheckIn: string
+  signal: Signal
+  suggestedAction: string
+  friction: string
+  aiRecommendation: string
+  weekAdherence: number[]
+  activeActionCount: number
+  completedActionCount: number
+}
+
 export const patients: Patient[] = [
   {
     id: "oscar-nilsson",
@@ -183,6 +197,11 @@ export type GeneratedAction = {
   title: string
   cadence: string
   priority: "Hög" | "Medel" | "Låg"
+  category?: "movement" | "nutrition" | "medication" | "measurement" | "check-in"
+  estimatedMinutes?: number
+  clinicalWeight?: number
+  patientReason?: string
+  verificationMethod?: string
 }
 
 export const generatedPlan: GeneratedAction[] = [
