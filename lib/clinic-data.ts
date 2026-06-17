@@ -44,6 +44,7 @@ export type LiveAdherence = {
   weekAdherence: number[]
   activeActionCount: number
   completedActionCount: number
+  behaviorAdaptation?: BehaviorAdaptation
 }
 
 export const patients: Patient[] = [
@@ -175,7 +176,7 @@ export const patients: Patient[] = [
     program: "Kardiometabol",
     signal: "Bevaka",
     adherence: 69,
-    missedHighValue: "Ojämn medicinföljsamhet",
+    missedHighValue: "Ojämn medicinrutin",
     lastCheckIn: "för 1 dag sedan",
     suggestedAction: "Påminn om kvällsdos",
     weekAdherence: [74, 70, 66, 72, 64, 69, 69],
@@ -210,7 +211,7 @@ export const patients: Patient[] = [
     friction: "Inga rapporterade hinder.",
     missedActions: ["Inga missade högvärdesåtgärder"],
     aiRecommendation:
-      "Stabil följsamhet. Överväg att höja träningsintensiteten vid nästa uppföljning.",
+      "Stabil kontinuitet. Överväg att höja träningsintensiteten vid nästa uppföljning.",
     behaviorAdaptation: {
       active: false,
       missedDays: 0,
@@ -238,7 +239,7 @@ export const patients: Patient[] = [
     friction: "Inga rapporterade hinder.",
     missedActions: ["Inga missade högvärdesåtgärder"],
     aiRecommendation:
-      "God och jämn följsamhet. Bibehåll plan och boka rutinuppföljning om 4 veckor.",
+      "God och jämn kontinuitet. Bibehåll plan och boka rutinuppföljning om 4 veckor.",
     behaviorAdaptation: {
       active: false,
       missedDays: 0,
@@ -247,7 +248,7 @@ export const patients: Patient[] = [
       adaptedAction: "Ingen adaptation aktiverad",
       threshold: "Adaptation vilande",
       reason:
-        "Följsamheten är tillräckligt stabil för att systemet ska fortsätta med nuvarande nivå.",
+        "Kontinuiteten är tillräckligt stabil för att systemet ska fortsätta med nuvarande nivå.",
       coachAction: "Boka rutinuppföljning om 4 veckor.",
     },
   },
@@ -308,14 +309,14 @@ export const mobileActions = [
 ]
 
 export const aiSummaryText =
-  "Patienten ligger på 42 % följsamhet de senaste 7 dagarna och missar framför allt rörelse och blodtrycksmätning. Mönstret tyder på tidsfriktion snarare än ovilja. Rekommenderad åtgärd är att förenkla rörelseplanen till kortare dagliga pass."
+  "Patienten ligger på 42 % kontinuitetsindex de senaste 7 dagarna och missar framför allt rörelse och blodtrycksmätning. Mönstret tyder på tidsfriktion snarare än ovilja. Rekommenderad åtgärd är att förenkla rörelseplanen till kortare dagliga pass."
 
 export const aiSummaryTags = ["Tidsfriktion", "Rörelse", "Blodtryck"]
 
 export const exportSections = [
   {
     label: "Sammanfattning",
-    body: "Alexandra Berg, 54 år. Följsamhet 42 % (7 dagar). Kritisk signal. Nedåtgående trend.",
+    body: "Alexandra Berg, 54 år. Kontinuitetsindex 42 % (7 dagar). Kritisk signal. Nedåtgående trend.",
   },
   {
     label: "Missade åtgärder",
@@ -327,6 +328,6 @@ export const exportSections = [
   },
   {
     label: "Uppföljning",
-    body: "Ny avstämning om 7 dagar. Eskalera vid fortsatt följsamhet under 50 %.",
+    body: "Ny avstämning om 7 dagar. Eskalera vid fortsatt kontinuitetsindex under 50 %.",
   },
 ]

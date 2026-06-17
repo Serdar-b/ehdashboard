@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'Executive Health — Klinisk uppföljning',
   description:
-    'Klinisk uppföljningsplattform för Executive Health. Omvandlar läkarråd till dagliga patientåtgärder, mäter följsamhet och visar filtrerade kliniska signaler.',
+    'Protocol to Adherence-plattform för Executive Health. Omvandlar läkarråd till dagliga patientåtgärder, mäter kontinuitetsindex och visar filtrerade kliniska signaler.',
   generator: 'v0.app',
   icons: {
     icon: [

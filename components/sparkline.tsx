@@ -44,7 +44,7 @@ export function Sparkline({
       className={cn("w-full", className)}
       preserveAspectRatio="none"
       role="img"
-      aria-label="7-dagars följsamhetstrend"
+      aria-label="7-dagars kontinuitetsindex"
     >
       <defs>
         <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">

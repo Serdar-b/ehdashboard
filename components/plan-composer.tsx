@@ -58,7 +58,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
       const message =
         err instanceof Error
           ? err.message
-          : "Kunde inte generera vårdplan med AI-funktionen."
+          : "Kunde inte generera mikrohandlingar med AI-funktionen."
       setError(message)
       setLoading(false)
     }

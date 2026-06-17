@@ -1,4 +1,9 @@
-import type { LiveAdherence, Patient, Signal } from "@/lib/clinic-data"
+import type {
+  BehaviorAdaptation,
+  LiveAdherence,
+  Patient,
+  Signal,
+} from "@/lib/clinic-data"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 
 type CarePlanActionRow = {
@@ -58,7 +63,17 @@ function createRecommendation(signal: Signal, missedActions: string[]) {
     return "Behåll nuvarande plan"
   }
 
-  if (missedActions.some((action) => action.toLowerCase().includes("promenad"))) {
+  if (
+    missedActions.some((action) => {
+      const normalized = action.toLowerCase()
+      return (
+        normalized.includes("promenad") ||
+        normalized.includes("zon 2") ||
+        normalized.includes("steg") ||
+        normalized.includes("rörelse")
+      )
+    })
+  ) {
     return "Förenkla rörelseplan"
   }
 
@@ -66,21 +81,75 @@ function createRecommendation(signal: Signal, missedActions: string[]) {
     return "Kontakta patienten idag"
   }
 
-  return "Skicka följsamhetspåminnelse"
+  return "Skicka kontinuitetsstöd"
 }
 
 function createAiRecommendation(signal: Signal, adherence: number, missedActions: string[]) {
   if (signal === "Stabil") {
-    return "Patienten följer dagens plan. Fortsätt med automatiserad förstärkning och behåll nuvarande nivå."
+    return "Patienten håller dagens kontinuitet. Fortsätt med automatiserad förstärkning och behåll nuvarande nivå."
   }
 
   const missed = missedActions.length > 0 ? missedActions.join(", ") : "dagens åtgärder"
 
   if (signal === "Kritisk") {
-    return `Dagens följsamhet är ${adherence} %. Prioritera uppföljning och förenkla planen runt: ${missed}.`
+    return `Dagens kontinuitetsindex är ${adherence} %. Prioritera uppföljning och förenkla planen runt: ${missed}.`
   }
 
-  return `Dagens följsamhet är ${adherence} %. Skicka beteendestöd och fokusera nästa steg på: ${missed}.`
+  return `Dagens kontinuitetsindex är ${adherence} %. Skicka beteendestöd och fokusera nästa steg på: ${missed}.`
+}
+
+function createBehaviorAdaptation(
+  signal: Signal,
+  missedActions: string[],
+): BehaviorAdaptation {
+  const movementAction =
+    missedActions.find((action) => {
+      const normalized = action.toLowerCase()
+      return (
+        normalized.includes("promenad") ||
+        normalized.includes("zon 2") ||
+        normalized.includes("steg") ||
+        normalized.includes("rörelse")
+      )
+    }) ?? missedActions[0]
+
+  if (!movementAction || signal === "Stabil") {
+    return {
+      active: false,
+      missedDays: 0,
+      trigger: "Kontinuiteten håller idag",
+      originalAction: "Nuvarande patientplan",
+      adaptedAction: "Ingen sänkning, behåll rytm",
+      threshold: "Adaptation vilande",
+      reason:
+        "Patienten håller tillräcklig kontinuitet för att systemet ska fortsätta med nuvarande nivå.",
+      coachAction: "Behåll plan och fortsätt bevaka signalen.",
+    }
+  }
+
+  const isMovement = movementAction !== missedActions[0] || /promenad|zon 2|steg|rörelse/i.test(movementAction)
+
+  return {
+    active: true,
+    missedDays: signal === "Kritisk" ? 2 : 1,
+    trigger:
+      signal === "Kritisk"
+        ? "Missade högvärdesåtgärder idag"
+        : "Kontinuitetsrisk upptäckt",
+    originalAction: movementAction,
+    adaptedAction: isMovement
+      ? "5 min återstart räcker idag"
+      : "En kärnåtgärd räcker för att starta om rytmen",
+    threshold: isMovement
+      ? "Tröskel sänkt från full rörelseplan till återstart"
+      : "Tröskel sänkt till minsta meningsfulla handling",
+    reason:
+      "Systemet prioriterar återupptagen kontinuitet före perfekt genomförande när patienten riskerar att falla ur planen.",
+    coachAction:
+      signal === "Kritisk"
+        ? "Kontakta patienten och bekräfta den sänkta tröskeln."
+        : "Skicka beteendestöd och följ upp nästa incheckning.",
+  }
 }
 
 function mergeLivePatient(patient: Patient, live: LiveAdherence): Patient {
@@ -95,6 +164,7 @@ function mergeLivePatient(patient: Patient, live: LiveAdherence): Patient {
     friction: live.friction,
     aiRecommendation: live.aiRecommendation,
     weekAdherence: live.weekAdherence,
+    behaviorAdaptation: live.behaviorAdaptation ?? patient.behaviorAdaptation,
   }
 }
 
@@ -182,5 +252,6 @@ export async function fetchLiveAdherence(patientId: string): Promise<LiveAdheren
     weekAdherence: [50, 60, 55, 70, 65, adherence, adherence],
     activeActionCount: actionRows.length,
     completedActionCount: actionRows.length - missedActions.length,
+    behaviorAdaptation: createBehaviorAdaptation(signal, missedActions),
   }
 }

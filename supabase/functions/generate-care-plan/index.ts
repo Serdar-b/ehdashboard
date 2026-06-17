@@ -108,7 +108,7 @@ function normalizeAiResponse(value: unknown, request: GenerateCarePlanRequest) {
   return {
     plan: {
       title: safeString(parsed.title, `${request.patient?.program ?? "Klinisk"} - daglig plan`, 90),
-      goal: safeString(parsed.goal, request.patient?.goal ?? "Öka följsamhet till läkarens plan.", 180),
+      goal: safeString(parsed.goal, request.patient?.goal ?? "Öka kontinuitet till läkarens plan.", 180),
       riskArea: safeString(parsed.riskArea, request.patient?.riskArea ?? "Preventiv uppföljning", 90),
       durationWeeks: clampNumber(parsed.durationWeeks, 12, 1, 52),
       summary: safeString(
