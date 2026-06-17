@@ -12,6 +12,7 @@ import { PatientDetail } from "@/components/patient-detail"
 import { PlanComposer } from "@/components/plan-composer"
 import { MobilePreview } from "@/components/mobile-preview"
 import { AiSummary } from "@/components/ai-summary"
+import { BehaviorAdaptation } from "@/components/behavior-adaptation"
 import { ExportCard } from "@/components/export-card"
 import { applyLiveAdherence, fetchLiveAdherence } from "@/lib/supabase/adherence"
 
@@ -47,7 +48,7 @@ export function Dashboard() {
       }
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Kunde inte hämta liveföljsamhet."
+        err instanceof Error ? err.message : "Kunde inte hämta livekontinuitet."
       setLiveError(message)
     } finally {
       setRefreshingPatientId((current) => (current === patientId ? null : current))
@@ -76,11 +77,13 @@ export function Dashboard() {
           <Topbar />
 
           <main className="flex-1 space-y-8 p-5 md:p-8">
-            <KpiCards />
+            <section id="overview" className="scroll-mt-24">
+              <KpiCards />
+            </section>
 
             {liveError ? (
               <div className="rounded-xl border border-[#F7D982] bg-[#FFF0C7] px-4 py-3 text-sm font-medium text-[#9A4B22]">
-                Liveföljsamhet kunde inte hämtas: {liveError}
+                Livekontinuitet kunde inte hämtas: {liveError}
               </div>
             ) : null}
 
@@ -91,12 +94,19 @@ export function Dashboard() {
               refreshing={refreshingPatientId === selected.id}
             />
 
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_0.9fr]">
+            <section
+              id="clinical-signal"
+              className="grid scroll-mt-24 grid-cols-1 gap-6 xl:grid-cols-[1fr_0.9fr] 2xl:grid-cols-[1fr_1fr_0.9fr]"
+            >
               <AiSummary patient={selected} />
+              <BehaviorAdaptation patient={selected} />
               <MobilePreview sentPlan={sentPlan} />
-            </div>
+            </section>
 
-            <section className="grid grid-cols-1 items-start gap-6 2xl:grid-cols-[1.45fr_0.8fr]">
+            <section
+              id="patient-queue"
+              className="grid scroll-mt-24 grid-cols-1 items-start gap-6 2xl:grid-cols-[1.45fr_0.8fr]"
+            >
               <PatientQueue
                 patients={visiblePatients}
                 selectedId={selected.id}
@@ -107,11 +117,13 @@ export function Dashboard() {
               </div>
             </section>
 
-            <div className="grid grid-cols-1 gap-6">
+            <section id="doctor-input" className="grid scroll-mt-24 grid-cols-1 gap-6">
               <PlanComposer patient={selected} onPlanSent={handlePlanSent} />
-            </div>
+            </section>
 
-            <ExportCard patient={selected} />
+            <section id="export" className="scroll-mt-24">
+              <ExportCard patient={selected} />
+            </section>
           </main>
         </div>
       </div>
@@ -150,7 +162,7 @@ function ActivePlanSummary({
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-[#078C7A]">
-              Aktiv patientplan
+              Protocol to Adherence Engine
             </p>
             <h2 className="mt-1 text-xl font-bold tracking-tight text-[#27221F]">
               {live?.activePlanTitle ?? `Ingen aktiv Supabase-plan för ${patientName}`}
@@ -158,7 +170,7 @@ function ActivePlanSummary({
             <p className="mt-1 text-sm text-[#817771]">
               {live
                 ? `Skickad till appen ${formatSentAt(live.sentToAppAt)}`
-                : "Generera och skicka en plan för att koppla dashboarden till mobilappen."}
+                : "Generera och skicka en plan för att koppla läkarens protokoll till patientens vardag."}
             </p>
           </div>
         </div>
@@ -176,7 +188,7 @@ function ActivePlanSummary({
               </div>
               <div className="rounded-xl bg-[#FBFAF8] px-4 py-3">
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-[#817771]">
-                  Följsamhet
+                  Kontinuitetsindex
                 </p>
                 <p className="mt-1 text-lg font-bold text-[#27221F]">
                   {live.adherence} %
@@ -204,7 +216,7 @@ function ActivePlanSummary({
             className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#27221F] px-4 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
           >
             <RefreshCw className={`size-4 ${refreshing ? "animate-spin" : ""}`} />
-            {refreshing ? "Uppdaterar..." : "Uppdatera följsamhet"}
+            {refreshing ? "Uppdaterar..." : "Uppdatera index"}
           </button>
         </div>
       </div>

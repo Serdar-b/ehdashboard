@@ -1,24 +1,21 @@
 ﻿"use client"
 
 import {
+  ClipboardPenLine,
   LayoutDashboard,
-  Users,
-  ClipboardList,
-  Sparkles,
   FileOutput,
-  Settings,
   ShieldCheck,
-  LogOut,
+  Sparkles,
+  Users,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const nav = [
-  { label: "Översikt", icon: LayoutDashboard, active: true },
-  { label: "Patienter", icon: Users },
-  { label: "Vårdplaner", icon: ClipboardList },
-  { label: "AI-sammanfattningar", icon: Sparkles },
-  { label: "Export", icon: FileOutput },
-  { label: "Inställningar", icon: Settings },
+  { label: "Översikt", icon: LayoutDashboard, href: "#overview", active: true },
+  { label: "Klinisk signal", icon: Sparkles, href: "#clinical-signal" },
+  { label: "Patientkö", icon: Users, href: "#patient-queue" },
+  { label: "AI-input", icon: ClipboardPenLine, href: "#doctor-input" },
+  { label: "Export", icon: FileOutput, href: "#export" },
 ]
 
 export function Sidebar() {
@@ -33,15 +30,16 @@ export function Sidebar() {
             Executive Health
           </p>
           <p className="text-[11px] font-medium text-[#817771]">
-            Klinisk uppföljning
+            Protocol to Adherence
           </p>
         </div>
       </div>
 
       <nav className="flex flex-1 flex-col gap-3 px-5 pt-3">
         {nav.map((item) => (
-          <button
+          <a
             key={item.label}
+            href={item.href}
             className={cn(
               "flex h-11 items-center gap-3 rounded-xl px-4 text-sm font-medium transition-colors",
               item.active
@@ -52,15 +50,19 @@ export function Sidebar() {
           >
             <item.icon className="size-4.5 shrink-0 stroke-[1.8]" />
             {item.label}
-          </button>
+          </a>
         ))}
       </nav>
 
       <div className="px-5 pb-6">
-        <button className="flex h-11 items-center gap-3 rounded-xl px-4 text-sm font-medium text-[#635C57] transition-colors hover:bg-[#F7F7F8] hover:text-[#27221F]">
-          <LogOut className="size-4.5 stroke-[1.8]" />
-          Logga ut
-        </button>
+        <div className="rounded-xl bg-[#FBFAF8] px-4 py-3">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-[#078C7A]">
+            Demo-flöde
+          </p>
+          <p className="mt-1 text-xs leading-5 text-[#817771]">
+            Anteckning → mikrohandlingar → patientapp → klinisk signal.
+          </p>
+        </div>
       </div>
     </aside>
   )

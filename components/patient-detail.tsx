@@ -59,7 +59,7 @@ export function PatientDetail({ patient }: { patient: Patient }) {
       <div>
         <div className="mb-2.5 flex items-center justify-between">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            7-dagars följsamhet
+            7-dagars kontinuitetsindex
           </p>
           <span className="flex items-center gap-1 text-sm font-semibold tabular-nums text-foreground">
             {trendUp ? (
@@ -113,7 +113,7 @@ export function PatientDetail({ patient }: { patient: Patient }) {
         <div className="mb-1.5 flex items-center gap-1.5">
           <Brain className="size-4 text-info" />
           <p className="text-xs font-semibold uppercase tracking-wide text-info">
-            AI-rekommendation
+            Klinisk rekommendation
           </p>
         </div>
         <p className="text-sm leading-relaxed text-foreground">

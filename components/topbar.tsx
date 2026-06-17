@@ -1,7 +1,7 @@
 ﻿"use client"
 
 import { useState } from "react"
-import { Search, ChevronDown, Activity } from "lucide-react"
+import { ChevronDown, Activity } from "lucide-react"
 
 export function Topbar() {
   const [open, setOpen] = useState(false)
@@ -23,18 +23,11 @@ export function Topbar() {
 
       <div className="hidden min-w-[150px] lg:block">
         <h1 className="text-[28px] font-bold tracking-tight text-[#27221F]">
-          Översikt
+          Protocol to Adherence
         </h1>
-      </div>
-
-      <div className="relative hidden flex-1 md:block md:max-w-[340px]">
-        <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[#635C57]" />
-        <input
-          type="search"
-          placeholder="Sök patient eller signal..."
-          className="h-11 w-full rounded-xl border border-[#EEE9E4] bg-white pl-11 pr-4 text-sm text-[#27221F] outline-none shadow-[0_10px_28px_rgba(59,42,32,0.04)] placeholder:text-[#A59D97] focus-visible:border-[#078C7A] focus-visible:ring-4 focus-visible:ring-[#078C7A]/10"
-          aria-label="Sök"
-        />
+        <p className="mt-0.5 text-xs font-semibold uppercase tracking-wide text-[#078C7A]">
+          Riskkontroll för patientgapet
+        </p>
       </div>
 
       <div className="ml-auto flex shrink-0 items-center gap-2">

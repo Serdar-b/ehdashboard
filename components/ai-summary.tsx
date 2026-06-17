@@ -1,8 +1,8 @@
-import { ArrowRight, Brain, ShieldCheck } from "lucide-react"
+import { Brain, ShieldCheck } from "lucide-react"
 import type { Patient } from "@/lib/clinic-data"
 
 function createSummary(patient: Patient) {
-  return `${patient.name} ligger på ${patient.adherence} % följsamhet de senaste 7 dagarna. Aktuell signal är ${patient.signal.toLowerCase()}. Huvudmönster: ${patient.missedHighValue.toLowerCase()}. Beteendefriktion: ${patient.friction.toLowerCase()} Rekommenderad åtgärd: ${patient.aiRecommendation}`
+  return `${patient.name} har ${patient.adherence} % kontinuitetsindex de senaste 7 dagarna. Aktuell klinisk signal är ${patient.signal.toLowerCase()}. Huvudmönster: ${patient.missedHighValue.toLowerCase()}. Beteendefriktion: ${patient.friction.toLowerCase()} Rekommenderad åtgärd: ${patient.aiRecommendation}`
 }
 
 function createTags(patient: Patient) {
@@ -22,10 +22,10 @@ export function AiSummary({ patient }: { patient: Patient }) {
           </div>
           <div className="leading-tight">
             <h2 className="text-sm font-semibold text-foreground">
-              AI-sammanfattning
+              Klinisk signal
             </h2>
             <p className="text-xs text-muted-foreground">
-              {patient.name} · uppdaterad nyss
+              {patient.name} · filtrerad från patientens vardag
             </p>
           </div>
         </div>
@@ -50,19 +50,15 @@ export function AiSummary({ patient }: { patient: Patient }) {
         ))}
       </div>
 
-      <div className="mt-auto flex items-center gap-2 border-t border-[#EEE9E4] pt-5">
+      <div className="mt-auto border-t border-[#EEE9E4] pt-5">
         <div className="flex-1 rounded-xl bg-[#F0FAF8] px-3.5 py-3">
           <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-            Rekommenderad åtgärd
+            Nästa kliniska åtgärd
           </p>
           <p className="mt-1 text-sm font-medium text-foreground">
             {patient.suggestedAction}
           </p>
         </div>
-        <button className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#27221F] text-white transition-opacity hover:opacity-90">
-          <ArrowRight className="size-4.5" />
-          <span className="sr-only">Tillämpa rekommendation</span>
-        </button>
       </div>
     </section>
   )

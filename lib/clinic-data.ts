@@ -16,6 +16,18 @@ export type Patient = {
   friction: string
   missedActions: string[]
   aiRecommendation: string
+  behaviorAdaptation?: BehaviorAdaptation
+}
+
+export type BehaviorAdaptation = {
+  active: boolean
+  missedDays: number
+  trigger: string
+  originalAction: string
+  adaptedAction: string
+  threshold: string
+  reason: string
+  coachAction: string
 }
 
 export type LiveAdherence = {
@@ -55,6 +67,17 @@ export const patients: Patient[] = [
     ],
     aiRecommendation:
       "Hög risk för avhopp. Boka telefonavstämning och förenkla planen till en daglig kärnåtgärd tills kontakt återupprättats.",
+    behaviorAdaptation: {
+      active: true,
+      missedDays: 4,
+      trigger: "Ingen incheckning på 4 dygn",
+      originalAction: "30 min zon 2-promenad + blodtryck + medicinpåminnelse",
+      adaptedAction: "En 5 min återstart och en bekräftad medicinrutin idag",
+      threshold: "Tröskel sänkt från full plan till en kärnåtgärd",
+      reason:
+        "Systemet prioriterar återupptagen kontinuitet före perfekt genomförande när patienten är på väg att falla ur planen.",
+      coachAction: "Ring patienten och starta om med en daglig kärnåtgärd.",
+    },
   },
   {
     id: "alexandra-berg",
@@ -76,6 +99,17 @@ export const patients: Patient[] = [
     ],
     aiRecommendation:
       "Justera zon 2-promenad till 15 minuter dagligen i 7 dagar och följ upp blodtrycksmätningen.",
+    behaviorAdaptation: {
+      active: true,
+      missedDays: 2,
+      trigger: "Missat rörelse och blodtryck i två dygn",
+      originalAction: "30 min zon 2-promenad, 5 ggr/vecka",
+      adaptedAction: "10 min promenad idag räcker för att hålla rytmen",
+      threshold: "Tröskel sänkt efter två missade dagar",
+      reason:
+        "Planen förenklas till minsta meningsfulla handling så att patienten behåller momentum utan skuld eller avhopp.",
+      coachAction: "Skicka beteendestöd och bekräfta kortare rörelseplan.",
+    },
   },
   {
     id: "mikael-sandell",
@@ -93,6 +127,17 @@ export const patients: Patient[] = [
     missedActions: ["Kostloggning (3 dygn)", "Kvällspromenad (2 pass)"],
     aiRecommendation:
       "Återinför kostloggning med påminnelse kl 19 och planera måltider inför nästa resa.",
+    behaviorAdaptation: {
+      active: true,
+      missedDays: 3,
+      trigger: "Resa bröt kostrutinen",
+      originalAction: "Full kostloggning varje kväll",
+      adaptedAction: "Logga en måltid kl 19 och markera nästa planerade måltid",
+      threshold: "Reseläge: färre steg, samma kliniska signal",
+      reason:
+        "När rutinen bryts förenklas handlingen till en enda återkopplingspunkt för att återbygga rytm.",
+      coachAction: "Följ upp resestrategi vid nästa avstämning.",
+    },
   },
   {
     id: "lina-friberg",
@@ -110,6 +155,17 @@ export const patients: Patient[] = [
     missedActions: ["Morgonrörelse (3 pass)", "Vätskeloggning (2 dygn)"],
     aiRecommendation:
       "Flytta rörelsepasset till eftermiddagen och kartlägg sömnmönstret i 7 dagar.",
+    behaviorAdaptation: {
+      active: true,
+      missedDays: 2,
+      trigger: "Låg morgonenergi och missade morgonpass",
+      originalAction: "Morgonrörelse före arbetsdagen",
+      adaptedAction: "5 min rörlighet efter lunch och kvällsenergi-check",
+      threshold: "Tidpunkt flyttad i stället för att kräva mer disciplin",
+      reason:
+        "Systemet matchar åtgärden mot patientens energimönster för att skydda kontinuiteten.",
+      coachAction: "Bevaka energi och sömn i 7 dagar.",
+    },
   },
   {
     id: "johan-ekstrom",
@@ -127,6 +183,17 @@ export const patients: Patient[] = [
     missedActions: ["Kvällsmedicin (2 dygn)", "Stegmål (3 dygn)"],
     aiRecommendation:
       "Lägg en återkommande påminnelse kl 21 och koppla dosen till en befintlig kvällsrutin.",
+    behaviorAdaptation: {
+      active: false,
+      missedDays: 1,
+      trigger: "Enstaka missad kvällsdos",
+      originalAction: "Kvällsmedicin kl 21",
+      adaptedAction: "Behåll plan, förstärk med rutinankare",
+      threshold: "Ingen tröskelsänkning ännu",
+      reason:
+        "Mönstret är ojämnt men inte ett avhoppsmönster. Systemet bevakar innan planen förenklas.",
+      coachAction: "Påminn om koppling till befintlig kvällsrutin.",
+    },
   },
   {
     id: "sara-holmqvist",
@@ -144,6 +211,17 @@ export const patients: Patient[] = [
     missedActions: ["Inga missade högvärdesåtgärder"],
     aiRecommendation:
       "Stabil följsamhet. Överväg att höja träningsintensiteten vid nästa uppföljning.",
+    behaviorAdaptation: {
+      active: false,
+      missedDays: 0,
+      trigger: "Stabil kontinuitet",
+      originalAction: "Nuvarande preventionsplan",
+      adaptedAction: "Ingen sänkning, behåll rytm",
+      threshold: "Adaptation vilande",
+      reason:
+        "Patienten håller kontinuiteten och behöver förstärkning snarare än förenkling.",
+      coachAction: "Behåll plan och överväg progression vid nästa besök.",
+    },
   },
   {
     id: "anders-lund",
@@ -161,6 +239,17 @@ export const patients: Patient[] = [
     missedActions: ["Inga missade högvärdesåtgärder"],
     aiRecommendation:
       "God och jämn följsamhet. Bibehåll plan och boka rutinuppföljning om 4 veckor.",
+    behaviorAdaptation: {
+      active: false,
+      missedDays: 0,
+      trigger: "Stabil över tid",
+      originalAction: "Nuvarande hjärt-kärlplan",
+      adaptedAction: "Ingen adaptation aktiverad",
+      threshold: "Adaptation vilande",
+      reason:
+        "Följsamheten är tillräckligt stabil för att systemet ska fortsätta med nuvarande nivå.",
+      coachAction: "Boka rutinuppföljning om 4 veckor.",
+    },
   },
 ]
 
@@ -180,7 +269,7 @@ export const kpis = [
     accent: "coral" as const,
   },
   {
-    label: "Genomsnittlig följsamhet",
+    label: "Genomsnittligt kontinuitetsindex",
     value: "78 %",
     delta: "+4 % mot förra veckan",
     trend: "up" as const,

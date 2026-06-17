@@ -8,7 +8,7 @@ function createExportSections(patient: Patient) {
   return [
     {
       label: "Sammanfattning",
-      body: `${patient.name}, ${patient.age} år. Följsamhet ${patient.adherence} % (7 dagar). ${patient.signal} signal. Program: ${patient.program}.`,
+      body: `${patient.name}, ${patient.age} år. Kontinuitetsindex ${patient.adherence} % (7 dagar). ${patient.signal} signal. Program: ${patient.program}.`,
     },
     {
       label: "Missade åtgärder",
@@ -22,7 +22,7 @@ function createExportSections(patient: Patient) {
       label: "Uppföljning",
       body:
         patient.signal === "Kritisk"
-          ? "Ny avstämning inom 48 timmar. Eskalera vid fortsatt låg följsamhet."
+          ? "Ny avstämning inom 48 timmar. Eskalera vid fortsatt lågt kontinuitetsindex."
           : "Ny avstämning om 7 dagar eller tidigare vid försämrad signal.",
     },
   ]
@@ -52,7 +52,7 @@ export function ExportCard({ patient }: { patient: Patient }) {
             Export till journalsystem
           </h2>
           <p className="text-xs text-muted-foreground">
-            Strukturerad sammanfattning för vald patient
+            Filtrerad klinisk signal för vald patient
           </p>
         </div>
       </div>

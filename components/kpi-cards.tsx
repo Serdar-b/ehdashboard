@@ -78,14 +78,13 @@ export function KpiCards() {
 
       <div className="rounded-xl bg-white p-6 shadow-[0_16px_38px_rgba(59,42,32,0.035)]">
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-[#27221F]">Patientstatistik</h2>
-          <button className="text-sm font-medium text-[#817771]">Filter</button>
+          <h2 className="text-lg font-bold text-[#27221F]">Kontinuitetsindex</h2>
         </div>
         <div className="relative h-[210px] overflow-hidden">
           <div className="absolute inset-0 flex flex-col justify-between py-1">
-            {[200, 150, 100, 50, 0].map((value) => (
+            {[100, 75, 50, 25, 0].map((value) => (
               <div key={value} className="flex items-center gap-3">
-                <span className="w-8 text-[11px] text-[#A59D97]">{value}K</span>
+                <span className="w-8 text-[11px] text-[#A59D97]">{value}%</span>
                 <span className="h-px flex-1 border-t border-dashed border-[#EEE9E4]" />
               </div>
             ))}
@@ -115,7 +114,7 @@ export function KpiCards() {
             <circle cx="224" cy="75" r="5" fill="#078C7A" stroke="white" strokeWidth="3" />
           </svg>
           <div className="absolute left-[52%] top-[50px] rounded-lg bg-[#27221F] px-3 py-1.5 text-xs font-semibold text-white shadow-lg">
-            82.873
+            78 % index
           </div>
           <div className="absolute inset-x-12 bottom-0 flex justify-between text-[11px] text-[#817771]">
             {["Lör", "Sön", "Mån", "Tis", "Ons", "Tor", "Fre"].map((day) => (

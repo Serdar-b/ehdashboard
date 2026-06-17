@@ -89,10 +89,10 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
         </div>
         <div className="leading-tight">
           <h2 className="text-sm font-semibold text-foreground">
-            Skapa plan från läkaranteckning
+            Läkarens AI-input
           </h2>
           <p className="text-xs text-muted-foreground">
-            AI:n omvandlar fritext till strukturerade dagliga åtgärder
+            Journalanteckningen omvandlas till strukturerade dagliga mikrohandlingar
           </p>
         </div>
       </div>
@@ -116,7 +116,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
         ) : (
           <Sparkles className="size-4" />
         )}
-        {loading ? "Genererar..." : "Generera vårdplan"}
+        {loading ? "Genererar..." : "Generera mikrohandlingar"}
       </button>
 
       {error && !generated ? (
@@ -128,7 +128,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
       {generated ? (
       <div className="mt-4 space-y-2 transition-opacity">
         <p className="text-xs font-medium text-muted-foreground">
-          Genererade strukturerade åtgärder
+          Genererade mikrohandlingar
         </p>
         {actions.map((action, i) => {
           const Icon = icons[i % icons.length]

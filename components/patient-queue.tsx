@@ -1,6 +1,5 @@
 ﻿"use client"
 
-import { MoreHorizontal, Search } from "lucide-react"
 import type { Patient } from "@/lib/clinic-data"
 import { StatusBadge } from "@/components/status-badge"
 import { cn } from "@/lib/utils"
@@ -25,19 +24,11 @@ export function PatientQueue({
       <div className="mb-5 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-[22px] font-bold tracking-tight text-[#27221F]">
-            Prioriterad patientkö
+            Riskkontroll för health coaches
           </h2>
           <p className="mt-1 text-sm text-[#817771]">
-            Sorterad efter klinisk signal och följsamhet
+            Sorterad efter klinisk signal och kontinuitetsindex
           </p>
-        </div>
-        <div className="relative hidden w-[280px] md:block">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#A59D97]" />
-          <input
-            className="h-9 w-full rounded-lg border border-[#EEE9E4] bg-white pl-9 pr-3 text-sm outline-none placeholder:text-[#A59D97] focus:border-[#078C7A]"
-            placeholder="Sök"
-            type="search"
-          />
         </div>
       </div>
 
@@ -50,7 +41,6 @@ export function PatientQueue({
             <col className="w-[16%]" />
             <col className="w-[17%]" />
             <col />
-            <col className="w-9" />
           </colgroup>
           <thead>
             <tr className="border-y border-[#EEE9E4] bg-[#FBFAF8] text-left text-xs text-[#27221F]">
@@ -59,12 +49,9 @@ export function PatientQueue({
               </th>
               <th className="px-3 py-3 font-semibold">Patient</th>
               <th className="px-4 py-3 font-semibold">Signal</th>
-              <th className="px-4 py-3 font-semibold">Följsamhet</th>
+              <th className="px-4 py-3 font-semibold">Kontinuitetsindex</th>
               <th className="px-4 py-3 font-semibold">Senaste incheckning</th>
               <th className="px-4 py-3 font-semibold">Föreslagen åtgärd</th>
-              <th className="px-3 py-3 font-semibold text-right">
-                <span className="sr-only">Granska</span>
-              </th>
             </tr>
           </thead>
           <tbody>
@@ -132,9 +119,6 @@ export function PatientQueue({
                   </td>
                   <td className="px-4 py-3.5 font-medium leading-5 text-[#27221F]">
                     {p.suggestedAction}
-                  </td>
-                  <td className="px-3 py-3.5 text-right">
-                    <MoreHorizontal className="ml-auto size-5 text-[#817771]" />
                   </td>
                 </tr>
               )
