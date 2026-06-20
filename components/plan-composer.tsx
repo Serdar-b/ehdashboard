@@ -3,12 +3,11 @@
 import { useState } from "react"
 import {
   CheckCircle2,
-  Footprints,
-  HeartPulse,
   Loader2,
-  Pill,
+  Plus,
   Send,
   Sparkles,
+  Trash2,
 } from "lucide-react"
 import type { GeneratedAction, Patient } from "@/lib/clinic-data"
 import { createSendConfirmation } from "@/lib/ai-demo"
@@ -25,7 +24,27 @@ const priorityStyle: Record<GeneratedAction["priority"], string> = {
   Låg: "bg-secondary text-secondary-foreground",
 }
 
-const icons = [Pill, Footprints, HeartPulse]
+const emptyAction: GeneratedAction = {
+  title: "",
+  cadence: "",
+  priority: "Medel",
+  category: "check-in",
+  estimatedMinutes: undefined,
+  clinicalWeight: undefined,
+  patientReason: "",
+  verificationMethod: "",
+}
+
+const categoryOptions: Array<{
+  value: NonNullable<GeneratedAction["category"]>
+  label: string
+}> = [
+  { value: "movement", label: "Rörelse" },
+  { value: "nutrition", label: "Kost" },
+  { value: "medication", label: "Läkemedel" },
+  { value: "measurement", label: "Mätning" },
+  { value: "check-in", label: "Avstämning" },
+]
 
 type PlanComposerProps = {
   patient: Patient
@@ -41,6 +60,32 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
   const [confirmation, setConfirmation] = useState("")
   const [error, setError] = useState("")
   const [actions, setActions] = useState<GeneratedAction[]>([])
+
+  const hasInvalidActions =
+    actions.length === 0 ||
+    actions.some((action) => !action.title.trim() || !action.cadence.trim())
+
+  function updateAction(index: number, patch: Partial<GeneratedAction>) {
+    setActions((current) =>
+      current.map((action, actionIndex) =>
+        actionIndex === index ? { ...action, ...patch } : action,
+      ),
+    )
+    setSent(false)
+    setConfirmation("")
+  }
+
+  function removeAction(index: number) {
+    setActions((current) => current.filter((_, actionIndex) => actionIndex !== index))
+    setSent(false)
+    setConfirmation("")
+  }
+
+  function addAction() {
+    setActions((current) => [...current, { ...emptyAction }])
+    setSent(false)
+    setConfirmation("")
+  }
 
   async function handleGenerate() {
     setLoading(true)
@@ -65,6 +110,11 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
   }
 
   async function handleSend() {
+    if (hasInvalidActions) {
+      setError("Alla åtgärder måste ha en titel och frekvens innan planen skickas.")
+      return
+    }
+
     setSending(true)
     setError("")
 
@@ -127,30 +177,157 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
 
       {generated ? (
       <div className="mt-4 space-y-2 transition-opacity">
-        <p className="text-xs font-medium text-muted-foreground">
-          Genererade mikrohandlingar
-        </p>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-medium text-muted-foreground">
+              AI-utkast – granska och redigera före utskick
+            </p>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">
+              Alla fält nedan sparas som den plan patientappen tar emot.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={addAction}
+            disabled={sent || sending}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[#D8D1CB] bg-white px-3 py-2 text-xs font-semibold text-foreground hover:bg-[#FBFAF8] disabled:opacity-50"
+          >
+            <Plus className="size-3.5" />
+            Lägg till
+          </button>
+        </div>
         {actions.map((action, i) => {
-          const Icon = icons[i % icons.length]
           return (
             <div
-              key={action.title}
-              className="flex items-center gap-3 rounded-xl border border-[#EEE9E4] bg-[#FBFAF8] px-3 py-2.5"
+              key={i}
+              className="rounded-xl border border-[#EEE9E4] bg-[#FBFAF8] p-4"
             >
-              <div className="flex size-8 items-center justify-center rounded-lg bg-[#DDF4F1] text-[#078C7A]">
-                <Icon className="size-4" />
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <p className="text-xs font-semibold text-[#078C7A]">
+                  Mikrohandling {i + 1}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => removeAction(i)}
+                  disabled={sent || sending}
+                  aria-label={`Ta bort mikrohandling ${i + 1}`}
+                  className="rounded-lg p-1.5 text-muted-foreground hover:bg-coral-muted hover:text-coral disabled:opacity-50"
+                >
+                  <Trash2 className="size-4" />
+                </button>
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-foreground">
-                  {action.title}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {action.cadence}
-                </p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="text-xs font-medium text-muted-foreground sm:col-span-2">
+                  Titel
+                  <input
+                    value={action.title}
+                    onChange={(event) => updateAction(i, { title: event.target.value })}
+                    disabled={sent || sending}
+                    className="mt-1.5 w-full rounded-lg border border-[#E5DED8] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                  />
+                </label>
+                <label className="text-xs font-medium text-muted-foreground">
+                  Frekvens / tidpunkt
+                  <input
+                    value={action.cadence}
+                    onChange={(event) => updateAction(i, { cadence: event.target.value })}
+                    disabled={sent || sending}
+                    className="mt-1.5 w-full rounded-lg border border-[#E5DED8] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                  />
+                </label>
+                <label className="text-xs font-medium text-muted-foreground">
+                  Prioritet
+                  <select
+                    value={action.priority}
+                    onChange={(event) =>
+                      updateAction(i, {
+                        priority: event.target.value as GeneratedAction["priority"],
+                      })
+                    }
+                    disabled={sent || sending}
+                    className="mt-1.5 w-full rounded-lg border border-[#E5DED8] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                  >
+                    {Object.keys(priorityStyle).map((priority) => (
+                      <option key={priority} value={priority}>{priority}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="text-xs font-medium text-muted-foreground">
+                  Kategori
+                  <select
+                    value={action.category ?? "check-in"}
+                    onChange={(event) =>
+                      updateAction(i, {
+                        category: event.target.value as GeneratedAction["category"],
+                      })
+                    }
+                    disabled={sent || sending}
+                    className="mt-1.5 w-full rounded-lg border border-[#E5DED8] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                  >
+                    {categoryOptions.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="text-xs font-medium text-muted-foreground">
+                  Uppskattad tid (minuter)
+                  <input
+                    type="number"
+                    min={0}
+                    value={action.estimatedMinutes ?? ""}
+                    onChange={(event) =>
+                      updateAction(i, {
+                        estimatedMinutes: event.target.value === ""
+                          ? undefined
+                          : Number(event.target.value),
+                      })
+                    }
+                    disabled={sent || sending}
+                    className="mt-1.5 w-full rounded-lg border border-[#E5DED8] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                  />
+                </label>
+                <label className="text-xs font-medium text-muted-foreground">
+                  Klinisk vikt
+                  <input
+                    type="number"
+                    min={0}
+                    value={action.clinicalWeight ?? ""}
+                    onChange={(event) =>
+                      updateAction(i, {
+                        clinicalWeight: event.target.value === ""
+                          ? undefined
+                          : Number(event.target.value),
+                      })
+                    }
+                    disabled={sent || sending}
+                    className="mt-1.5 w-full rounded-lg border border-[#E5DED8] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                  />
+                </label>
+                <label className="text-xs font-medium text-muted-foreground sm:col-span-2">
+                  Förklaring till patienten
+                  <textarea
+                    value={action.patientReason ?? ""}
+                    onChange={(event) => updateAction(i, { patientReason: event.target.value })}
+                    disabled={sent || sending}
+                    rows={2}
+                    className="mt-1.5 w-full resize-y rounded-lg border border-[#E5DED8] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                  />
+                </label>
+                <label className="text-xs font-medium text-muted-foreground sm:col-span-2">
+                  Hur åtgärden verifieras
+                  <input
+                    value={action.verificationMethod ?? ""}
+                    onChange={(event) =>
+                      updateAction(i, { verificationMethod: event.target.value })
+                    }
+                    disabled={sent || sending}
+                    className="mt-1.5 w-full rounded-lg border border-[#E5DED8] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                  />
+                </label>
               </div>
               <span
                 className={cn(
-                  "shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium",
+                  "mt-3 inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium",
                   priorityStyle[action.priority],
                 )}
               >
@@ -179,7 +356,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
             </div>
             <button
               onClick={handleSend}
-              disabled={sent || sending}
+              disabled={sent || sending || hasInvalidActions}
               className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#078C7A] px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:bg-[#DDF4F1] disabled:text-[#078C7A]"
             >
               {sending ? (
