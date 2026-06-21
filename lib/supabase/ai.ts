@@ -1,15 +1,8 @@
-import type { GeneratedAction, Patient } from "@/lib/clinic-data"
+import type { GeneratedPlan, Patient } from "@/lib/clinic-data"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 
 type GenerateCarePlanResponse = {
-  plan: {
-    title: string
-    goal: string
-    riskArea: string
-    durationWeeks: number
-    summary: string
-    actions: GeneratedAction[]
-  }
+  plan: GeneratedPlan
 }
 
 async function getFunctionErrorMessage(error: unknown) {

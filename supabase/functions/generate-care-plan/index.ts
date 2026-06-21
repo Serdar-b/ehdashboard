@@ -116,7 +116,7 @@ function normalizeAiResponse(value: unknown, request: GenerateCarePlanRequest) {
         "Läkarens anteckning har strukturerats till dagliga patientåtgärder.",
         300,
       ),
-      actions: actions.slice(0, 8),
+      actions,
     },
   };
 }
@@ -149,7 +149,7 @@ Rules:
 - Keep actions concrete and doable today.
 - Prefer continuity over perfection.
 - Do not give diagnosis or emergency advice.
-- Create at most 8 actions.
+- Create the actions needed to represent the clinician's note accurately.
 - priority must be one of: "Hög", "Medel", "Låg".
 - category must be one of: "movement", "nutrition", "medication", "measurement", "check-in".
 - estimatedMinutes must be a positive integer.

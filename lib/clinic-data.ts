@@ -296,6 +296,15 @@ export type GeneratedAction = {
   verificationMethod?: string
 }
 
+export type GeneratedPlan = {
+  title: string
+  goal: string
+  riskArea: string
+  durationWeeks: number
+  summary: string
+  actions: GeneratedAction[]
+}
+
 export const generatedPlan: GeneratedAction[] = [
   { title: "Ta omega-3-tillskott", cadence: "Dagligen", priority: "Hög" },
   { title: "30 min zon 2-promenad", cadence: "5 ggr/vecka", priority: "Hög" },

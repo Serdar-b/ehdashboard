@@ -118,7 +118,11 @@ export function Dashboard() {
             </section>
 
             <section id="doctor-input" className="grid scroll-mt-24 grid-cols-1 gap-6">
-              <PlanComposer patient={selected} onPlanSent={handlePlanSent} />
+              <PlanComposer
+                key={selected.id}
+                patient={selected}
+                onPlanSent={handlePlanSent}
+              />
             </section>
 
             <section id="export" className="scroll-mt-24">

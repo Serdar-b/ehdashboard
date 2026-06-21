@@ -1,16 +1,16 @@
-import type { GeneratedAction, Patient } from "@/lib/clinic-data"
+import type { GeneratedPlan, Patient } from "@/lib/clinic-data"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 
 type SaveGeneratedPlanInput = {
   patient: Patient
   note: string
-  actions: GeneratedAction[]
+  plan: GeneratedPlan
 }
 
 export async function saveGeneratedPlan({
   patient,
   note,
-  actions,
+  plan,
 }: SaveGeneratedPlanInput) {
   const supabase = getSupabaseBrowserClient()
 
@@ -36,21 +36,54 @@ export async function saveGeneratedPlan({
 
   if (noteError) throw noteError
 
-  const { data: carePlan, error: planError } = await supabase
+  const richPlanRow = {
+    patient_id: patient.id,
+    doctor_note_id: doctorNote.id,
+    title: plan.title,
+    goal: plan.goal,
+    risk_area: plan.riskArea,
+    duration_weeks: plan.durationWeeks,
+    summary: plan.summary,
+    status: "active",
+    sent_to_app_at: new Date().toISOString(),
+  }
+
+  let { data: carePlan, error: planError } = await supabase
     .from("care_plans")
-    .insert({
-      patient_id: patient.id,
-      doctor_note_id: doctorNote.id,
-      title: `${patient.program} - daglig plan`,
-      status: "active",
-      sent_to_app_at: new Date().toISOString(),
-    })
+    .insert(richPlanRow)
     .select("id")
     .single()
 
-  if (planError) throw planError
+  if (planError) {
+    const message = planError.message.toLowerCase()
+    const missingRichPlanColumn =
+      message.includes("goal") ||
+      message.includes("risk_area") ||
+      message.includes("duration_weeks") ||
+      message.includes("summary")
 
-  const rows = actions.map((action, index) => ({
+    if (!missingRichPlanColumn) throw planError
+
+    const fallbackResult = await supabase
+      .from("care_plans")
+      .insert({
+        patient_id: patient.id,
+        doctor_note_id: doctorNote.id,
+        title: plan.title,
+        status: "active",
+        sent_to_app_at: new Date().toISOString(),
+      })
+      .select("id")
+      .single()
+
+    carePlan = fallbackResult.data
+    planError = fallbackResult.error
+    if (planError) throw planError
+  }
+
+  if (!carePlan) throw new Error("Vårdplanen kunde inte sparas.")
+
+  const rows = plan.actions.map((action, index) => ({
     care_plan_id: carePlan.id,
     patient_id: patient.id,
     doctor_note_id: doctorNote.id,
@@ -80,7 +113,7 @@ export async function saveGeneratedPlan({
       message.includes("patient_reason") ||
       message.includes("verification_method")
     ) {
-      const fallbackRows = actions.map((action, index) => ({
+      const fallbackRows = plan.actions.map((action, index) => ({
         care_plan_id: carePlan.id,
         patient_id: patient.id,
         doctor_note_id: doctorNote.id,

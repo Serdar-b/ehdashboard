@@ -11,6 +11,7 @@ type CarePlanActionRow = {
   title: string
   priority: string
   sort_order: number
+  clinical_weight?: number | null
 }
 
 type CarePlanRow = {
@@ -31,7 +32,8 @@ function startOfTodayIso() {
   return date.toISOString()
 }
 
-function priorityWeight(priority: string) {
+function priorityWeight(priority: string, clinicalWeight?: number | null) {
+  if (typeof clinicalWeight === "number" && clinicalWeight > 0) return clinicalWeight
   const normalized = priority.toLowerCase()
   if (normalized === "hög" || normalized === "high") return 30
   if (normalized === "låg" || normalized === "low") return 10
@@ -191,12 +193,26 @@ export async function fetchLiveAdherence(patientId: string): Promise<LiveAdheren
   if (!carePlan) return null
   const activePlan = carePlan as CarePlanRow
 
-  const { data: actions, error: actionsError } = await supabase
+  let { data: actions, error: actionsError } = await supabase
     .from("care_plan_actions")
-    .select("id,title,priority,sort_order")
+    .select("id,title,priority,sort_order,clinical_weight")
     .eq("care_plan_id", activePlan.id)
     .eq("status", "active")
     .order("sort_order", { ascending: true })
+
+  if (actionsError && actionsError.message.toLowerCase().includes("clinical_weight")) {
+    const fallbackResult = await supabase
+      .from("care_plan_actions")
+      .select("id,title,priority,sort_order")
+      .eq("care_plan_id", activePlan.id)
+      .eq("status", "active")
+      .order("sort_order", { ascending: true })
+    actions = fallbackResult.data?.map((action) => ({
+      ...action,
+      clinical_weight: null,
+    })) ?? null
+    actionsError = fallbackResult.error
+  }
 
   if (actionsError) throw actionsError
   if (!actions?.length) return null
@@ -221,9 +237,14 @@ export async function fetchLiveAdherence(patientId: string): Promise<LiveAdheren
     }
   }
 
-  const totalWeight = actionRows.reduce((sum, action) => sum + priorityWeight(action.priority), 0)
+  const totalWeight = actionRows.reduce(
+    (sum, action) => sum + priorityWeight(action.priority, action.clinical_weight),
+    0,
+  )
   const completedWeight = actionRows.reduce((sum, action) => {
-    return latestCompletedByAction.get(action.id) ? sum + priorityWeight(action.priority) : sum
+    return latestCompletedByAction.get(action.id)
+      ? sum + priorityWeight(action.priority, action.clinical_weight)
+      : sum
   }, 0)
   const adherence = totalWeight > 0 ? Math.round((completedWeight / totalWeight) * 100) : 0
   const missedActions = actionRows

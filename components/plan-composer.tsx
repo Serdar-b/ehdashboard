@@ -9,7 +9,7 @@ import {
   Sparkles,
   Trash2,
 } from "lucide-react"
-import type { GeneratedAction, Patient } from "@/lib/clinic-data"
+import type { GeneratedAction, GeneratedPlan, Patient } from "@/lib/clinic-data"
 import { createSendConfirmation } from "@/lib/ai-demo"
 import { generateCarePlanWithAi } from "@/lib/supabase/ai"
 import { saveGeneratedPlan } from "@/lib/supabase/protocol"
@@ -60,10 +60,24 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
   const [confirmation, setConfirmation] = useState("")
   const [error, setError] = useState("")
   const [actions, setActions] = useState<GeneratedAction[]>([])
+  const [planDetails, setPlanDetails] = useState<Omit<GeneratedPlan, "actions"> | null>(null)
 
   const hasInvalidActions =
     actions.length === 0 ||
     actions.some((action) => !action.title.trim() || !action.cadence.trim())
+  const hasInvalidPlan =
+    !planDetails ||
+    !planDetails.title.trim() ||
+    !planDetails.goal.trim() ||
+    !planDetails.riskArea.trim() ||
+    planDetails.durationWeeks < 1
+
+  function updatePlanDetails(patch: Partial<Omit<GeneratedPlan, "actions">>) {
+    setPlanDetails((current) => current ? { ...current, ...patch } : current)
+    setSent(false)
+    setConfirmation("")
+    setError("")
+  }
 
   function updateAction(index: number, patch: Partial<GeneratedAction>) {
     setActions((current) =>
@@ -73,18 +87,21 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
     )
     setSent(false)
     setConfirmation("")
+    setError("")
   }
 
   function removeAction(index: number) {
     setActions((current) => current.filter((_, actionIndex) => actionIndex !== index))
     setSent(false)
     setConfirmation("")
+    setError("")
   }
 
   function addAction() {
     setActions((current) => [...current, { ...emptyAction }])
     setSent(false)
     setConfirmation("")
+    setError("")
   }
 
   async function handleGenerate() {
@@ -96,7 +113,9 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
 
     try {
       const plan = await generateCarePlanWithAi({ note, patient })
-      setActions(plan.actions)
+      const { actions: generatedActions, ...details } = plan
+      setPlanDetails(details)
+      setActions(generatedActions)
       setLoading(false)
       setGenerated(true)
     } catch (err) {
@@ -110,8 +129,8 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
   }
 
   async function handleSend() {
-    if (hasInvalidActions) {
-      setError("Alla åtgärder måste ha en titel och frekvens innan planen skickas.")
+    if (hasInvalidPlan || hasInvalidActions || !planDetails) {
+      setError("Planen måste ha titel, mål, riskområde, längd och kompletta åtgärder före utskick.")
       return
     }
 
@@ -119,7 +138,11 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
     setError("")
 
     try {
-      await saveGeneratedPlan({ patient, note, actions })
+      await saveGeneratedPlan({
+        patient,
+        note,
+        plan: { ...planDetails, actions },
+      })
       onPlanSent(actions)
       setConfirmation(createSendConfirmation(patient, actions))
       setSent(true)
@@ -145,6 +168,18 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
             Journalanteckningen omvandlas till strukturerade dagliga mikrohandlingar
           </p>
         </div>
+      </div>
+
+      <div
+        className={`mb-4 rounded-xl px-3 py-2 text-xs font-medium ${
+          patient.id === "oscar-nilsson"
+            ? "border border-[#BCE9E2] bg-[#F0FAF8] text-[#078C7A]"
+            : "border border-[#F7D982] bg-[#FFF0C7] text-[#9A4B22]"
+        }`}
+      >
+        {patient.id === "oscar-nilsson"
+          ? "Ansluten live-demo: Oscar Nilssons mobilapp"
+          : "Den anslutna live-demoappen är kopplad till Oscar Nilsson. Välj Oscar för att visa flödet i mobilen."}
       </div>
 
       <textarea
@@ -177,6 +212,71 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
 
       {generated ? (
       <div className="mt-4 space-y-2 transition-opacity">
+        {planDetails ? (
+          <div className="rounded-xl border border-[#BCE9E2] bg-[#F0FAF8] p-4">
+            <div className="mb-3">
+              <p className="text-xs font-semibold text-[#078C7A]">12-veckorsplan</p>
+              <p className="mt-0.5 text-[11px] text-[#3C6761]">
+                AI-förslag – läkaren har full kontroll över planens innehåll.
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="text-xs font-medium text-[#3C6761] sm:col-span-2">
+                Plantitel
+                <input
+                  value={planDetails.title}
+                  onChange={(event) => updatePlanDetails({ title: event.target.value })}
+                  disabled={sent || sending}
+                  className="mt-1.5 w-full rounded-lg border border-[#BCE9E2] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                />
+              </label>
+              <label className="text-xs font-medium text-[#3C6761] sm:col-span-2">
+                Mål
+                <textarea
+                  value={planDetails.goal}
+                  onChange={(event) => updatePlanDetails({ goal: event.target.value })}
+                  disabled={sent || sending}
+                  rows={2}
+                  className="mt-1.5 w-full resize-y rounded-lg border border-[#BCE9E2] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                />
+              </label>
+              <label className="text-xs font-medium text-[#3C6761]">
+                Riskområde
+                <input
+                  value={planDetails.riskArea}
+                  onChange={(event) => updatePlanDetails({ riskArea: event.target.value })}
+                  disabled={sent || sending}
+                  className="mt-1.5 w-full rounded-lg border border-[#BCE9E2] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                />
+              </label>
+              <label className="text-xs font-medium text-[#3C6761]">
+                Längd (veckor)
+                <input
+                  type="number"
+                  min={1}
+                  max={52}
+                  value={planDetails.durationWeeks}
+                  onChange={(event) =>
+                    updatePlanDetails({ durationWeeks: Number(event.target.value) })
+                  }
+                  disabled={sent || sending}
+                  className="mt-1.5 w-full rounded-lg border border-[#BCE9E2] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                />
+              </label>
+              <label className="text-xs font-medium text-[#3C6761] sm:col-span-2">
+                Sammanfattning till patienten
+                <textarea
+                  value={planDetails.summary}
+                  onChange={(event) => updatePlanDetails({ summary: event.target.value })}
+                  disabled={sent || sending}
+                  rows={2}
+                  className="mt-1.5 w-full resize-y rounded-lg border border-[#BCE9E2] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                />
+              </label>
+            </div>
+          </div>
+        ) : null}
+
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xs font-medium text-muted-foreground">
@@ -356,7 +456,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
             </div>
             <button
               onClick={handleSend}
-              disabled={sent || sending || hasInvalidActions}
+              disabled={sent || sending || hasInvalidActions || hasInvalidPlan}
               className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#078C7A] px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:bg-[#DDF4F1] disabled:text-[#078C7A]"
             >
               {sending ? (
