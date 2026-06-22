@@ -4,13 +4,14 @@ import { useState } from "react"
 import {
   CheckCircle2,
   Loader2,
+  Pencil,
   Plus,
   Send,
   Sparkles,
   Trash2,
 } from "lucide-react"
 import type { GeneratedAction, GeneratedPlan, Patient } from "@/lib/clinic-data"
-import { createSendConfirmation } from "@/lib/ai-demo"
+import { createSendConfirmation, generateDemoCarePlan } from "@/lib/ai-demo"
 import { generateCarePlanWithAi } from "@/lib/supabase/ai"
 import { saveGeneratedPlan } from "@/lib/supabase/protocol"
 import { cn } from "@/lib/utils"
@@ -54,6 +55,8 @@ type PlanComposerProps = {
 export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
   const [note, setNote] = useState(example)
   const [loading, setLoading] = useState(false)
+  const [editingPlan, setEditingPlan] = useState(false)
+  const [editingActionIndex, setEditingActionIndex] = useState<number | null>(null)
   const [generated, setGenerated] = useState(false)
   const [sent, setSent] = useState(false)
   const [sending, setSending] = useState(false)
@@ -98,6 +101,8 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
   }
 
   function addAction() {
+    setEditingActionIndex(actions.length)
+    setEditingPlan(false)
     setActions((current) => [...current, { ...emptyAction }])
     setSent(false)
     setConfirmation("")
@@ -108,11 +113,21 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
     setLoading(true)
     setGenerated(false)
     setSent(false)
+    setEditingPlan(false)
+    setEditingActionIndex(null)
     setError("")
     setConfirmation("")
 
     try {
-      const plan = await generateCarePlanWithAi({ note, patient })
+      let plan: GeneratedPlan
+
+      try {
+        plan = await generateCarePlanWithAi({ note, patient })
+      } catch {
+        await new Promise((resolve) => setTimeout(resolve, 900))
+        plan = generateDemoCarePlan(note, patient)
+      }
+
       const { actions: generatedActions, ...details } = plan
       setPlanDetails(details)
       setActions(generatedActions)
@@ -200,45 +215,83 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
       ) : null}
 
       {generated ? (
-      <div className="mt-4 space-y-2 transition-opacity">
-        {planDetails ? (
-          <div className="rounded-xl border border-[#BCE9E2] bg-[#F0FAF8] p-4">
-            <div className="mb-3">
-              <p className="text-xs font-semibold text-[#078C7A]">12-veckorsplan</p>
-              <p className="mt-0.5 text-[11px] text-[#3C6761]">
-                AI-förslag – läkaren har full kontroll över planens innehåll.
-              </p>
+      <div className="mt-4 space-y-3 transition-opacity">
+        <div
+          className={cn(
+            "flex flex-col gap-3 rounded-2xl border p-5 sm:flex-row sm:items-center sm:justify-between",
+            editingPlan
+              ? "border-[#E7E2DE] bg-white"
+              : "border-[#BCE9E2] bg-[#F0FAF8]",
+          )}
+        >
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-[#078C7A]">
+              AI-förslag
+            </p>
+            <h3 className="mt-1 text-lg font-bold text-[#27221F]">
+              {planDetails?.title ?? `${patient.name}s dagliga plan`}
+            </h3>
+            <p className="mt-1 text-xs text-[#3C6761]">
+              {actions.length} mikrohandlingar · granska och skicka när planen känns rätt
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setEditingPlan((current) => !current)
+              setEditingActionIndex(null)
+            }}
+            disabled={sent || sending}
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-[#BCE9E2] bg-white px-4 py-2.5 text-sm font-semibold text-[#078C7A] transition-colors hover:bg-[#F7F7F8] disabled:opacity-50"
+          >
+            <Pencil className="size-4" />
+            {editingPlan ? "Stäng planinfo" : "Redigera planinfo"}
+          </button>
+        </div>
+
+        {editingPlan && planDetails ? (
+          <div className="rounded-2xl border border-[#E7E2DE] bg-white p-5">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-bold text-[#27221F]">Planinformation</p>
+                <p className="mt-1 text-xs text-[#817771]">
+                  Grunduppgifter som visas tillsammans med patientens plan.
+                </p>
+              </div>
+              <span className="shrink-0 rounded-full bg-[#F7F7F8] px-3 py-1.5 text-xs font-semibold text-[#635C57]">
+                {planDetails.durationWeeks} veckor
+              </span>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <label className="text-xs font-medium text-[#3C6761] sm:col-span-2">
+              <label className="text-xs font-semibold text-[#635C57] sm:col-span-2">
                 Plantitel
                 <input
                   value={planDetails.title}
                   onChange={(event) => updatePlanDetails({ title: event.target.value })}
                   disabled={sent || sending}
-                  className="mt-1.5 w-full rounded-lg border border-[#BCE9E2] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                  className="mt-1.5 w-full rounded-xl border border-[#DED6CF] bg-[#FBFAF8] px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-[#078C7A] focus:bg-white focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
                 />
               </label>
-              <label className="text-xs font-medium text-[#3C6761] sm:col-span-2">
+              <label className="text-xs font-semibold text-[#635C57] sm:col-span-2">
                 Mål
                 <textarea
                   value={planDetails.goal}
                   onChange={(event) => updatePlanDetails({ goal: event.target.value })}
                   disabled={sent || sending}
                   rows={2}
-                  className="mt-1.5 w-full resize-y rounded-lg border border-[#BCE9E2] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                  className="mt-1.5 w-full resize-y rounded-xl border border-[#DED6CF] bg-[#FBFAF8] px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-[#078C7A] focus:bg-white focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
                 />
               </label>
-              <label className="text-xs font-medium text-[#3C6761]">
+              <label className="text-xs font-semibold text-[#635C57]">
                 Riskområde
                 <input
                   value={planDetails.riskArea}
                   onChange={(event) => updatePlanDetails({ riskArea: event.target.value })}
                   disabled={sent || sending}
-                  className="mt-1.5 w-full rounded-lg border border-[#BCE9E2] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                  className="mt-1.5 w-full rounded-xl border border-[#DED6CF] bg-[#FBFAF8] px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-[#078C7A] focus:bg-white focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
                 />
               </label>
-              <label className="text-xs font-medium text-[#3C6761]">
+              <label className="text-xs font-semibold text-[#635C57]">
                 Längd (veckor)
                 <input
                   type="number"
@@ -249,30 +302,30 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                     updatePlanDetails({ durationWeeks: Number(event.target.value) })
                   }
                   disabled={sent || sending}
-                  className="mt-1.5 w-full rounded-lg border border-[#BCE9E2] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                  className="mt-1.5 w-full rounded-xl border border-[#DED6CF] bg-[#FBFAF8] px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-[#078C7A] focus:bg-white focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
                 />
               </label>
-              <label className="text-xs font-medium text-[#3C6761] sm:col-span-2">
+              <label className="text-xs font-semibold text-[#635C57] sm:col-span-2">
                 Sammanfattning till patienten
                 <textarea
                   value={planDetails.summary}
                   onChange={(event) => updatePlanDetails({ summary: event.target.value })}
                   disabled={sent || sending}
                   rows={2}
-                  className="mt-1.5 w-full resize-y rounded-lg border border-[#BCE9E2] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                  className="mt-1.5 w-full resize-y rounded-xl border border-[#DED6CF] bg-[#FBFAF8] px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-[#078C7A] focus:bg-white focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
                 />
               </label>
             </div>
           </div>
         ) : null}
 
-        <div className="flex items-center justify-between gap-3">
+        <div className="mt-4 flex items-center justify-between gap-3 px-1">
           <div>
-            <p className="text-xs font-medium text-muted-foreground">
-              AI-utkast – granska och redigera före utskick
+            <p className="text-sm font-bold text-[#27221F]">
+              Mikrohandlingar
             </p>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">
-              Alla fält nedan sparas som den plan patientappen tar emot.
+            <p className="mt-1 text-xs text-[#817771]">
+              Ändra bara det som behöver justeras före utskick.
             </p>
           </div>
           <button
@@ -282,49 +335,106 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
             className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[#D8D1CB] bg-white px-3 py-2 text-xs font-semibold text-foreground hover:bg-[#FBFAF8] disabled:opacity-50"
           >
             <Plus className="size-3.5" />
-            Lägg till
+            Lägg till handling
           </button>
         </div>
         {actions.map((action, i) => {
+          if (editingActionIndex !== i) {
+            return (
+              <div
+                key={`${action.title}-${i}`}
+                className="flex items-center gap-3 rounded-xl border border-[#E7E2DE] bg-white px-4 py-3.5"
+              >
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#DDF4F1] text-sm font-bold text-[#078C7A]">
+                  {i + 1}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold leading-5 text-[#27221F]">
+                    {action.title}
+                  </p>
+                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-[#817771]">
+                    <span>{action.cadence}</span>
+                    <span aria-hidden>·</span>
+                    <span>{action.priority} prioritet</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingActionIndex(i)
+                    setEditingPlan(false)
+                  }}
+                  disabled={sent || sending}
+                  className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-[#E7E2DE] bg-[#FBFAF8] px-3 py-2 text-xs font-semibold text-[#635C57] hover:border-[#BCE9E2] hover:text-[#078C7A] disabled:opacity-50"
+                >
+                  <Pencil className="size-3.5" />
+                  Redigera
+                </button>
+              </div>
+            )
+          }
+
           return (
             <div
               key={i}
-              className="rounded-xl border border-[#EEE9E4] bg-[#FBFAF8] p-4"
+              className="rounded-2xl border border-[#E7E2DE] bg-white p-5 shadow-[0_10px_24px_rgba(59,42,32,0.025)]"
             >
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <p className="text-xs font-semibold text-[#078C7A]">
-                  Mikrohandling {i + 1}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => removeAction(i)}
-                  disabled={sent || sending}
-                  aria-label={`Ta bort mikrohandling ${i + 1}`}
-                  className="rounded-lg p-1.5 text-muted-foreground hover:bg-coral-muted hover:text-coral disabled:opacity-50"
-                >
-                  <Trash2 className="size-4" />
-                </button>
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#DDF4F1] text-sm font-bold text-[#078C7A]">
+                    {i + 1}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-[#817771]">
+                      Mikrohandling
+                    </p>
+                    <p className="truncate text-sm font-semibold text-[#27221F]">
+                      {action.title || `Handling ${i + 1}`}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingActionIndex(null)}
+                    className="rounded-lg border border-[#E7E2DE] bg-[#FBFAF8] px-3 py-2 text-xs font-semibold text-[#635C57] hover:text-[#078C7A]"
+                  >
+                    Stäng
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      removeAction(i)
+                      setEditingActionIndex(null)
+                    }}
+                    disabled={sent || sending}
+                    aria-label={`Ta bort mikrohandling ${i + 1}`}
+                    className="rounded-lg p-2 text-muted-foreground hover:bg-coral-muted hover:text-coral disabled:opacity-50"
+                  >
+                    <Trash2 className="size-4" />
+                  </button>
+                </div>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label className="text-xs font-medium text-muted-foreground sm:col-span-2">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="text-xs font-semibold text-[#635C57] sm:col-span-2">
                   Titel
                   <input
                     value={action.title}
                     onChange={(event) => updateAction(i, { title: event.target.value })}
                     disabled={sent || sending}
-                    className="mt-1.5 w-full rounded-lg border border-[#E5DED8] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                    className="mt-1.5 w-full rounded-xl border border-[#DED6CF] bg-[#FBFAF8] px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-[#078C7A] focus:bg-white focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
                   />
                 </label>
-                <label className="text-xs font-medium text-muted-foreground">
+                <label className="text-xs font-semibold text-[#635C57]">
                   Frekvens / tidpunkt
                   <input
                     value={action.cadence}
                     onChange={(event) => updateAction(i, { cadence: event.target.value })}
                     disabled={sent || sending}
-                    className="mt-1.5 w-full rounded-lg border border-[#E5DED8] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                    className="mt-1.5 w-full rounded-xl border border-[#DED6CF] bg-[#FBFAF8] px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-[#078C7A] focus:bg-white focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
                   />
                 </label>
-                <label className="text-xs font-medium text-muted-foreground">
+                <label className="text-xs font-semibold text-[#635C57]">
                   Prioritet
                   <select
                     value={action.priority}
@@ -334,14 +444,19 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                       })
                     }
                     disabled={sent || sending}
-                    className="mt-1.5 w-full rounded-lg border border-[#E5DED8] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                    className="mt-1.5 w-full rounded-xl border border-[#DED6CF] bg-[#FBFAF8] px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-[#078C7A] focus:bg-white focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
                   >
                     {Object.keys(priorityStyle).map((priority) => (
                       <option key={priority} value={priority}>{priority}</option>
                     ))}
                   </select>
                 </label>
-                <label className="text-xs font-medium text-muted-foreground">
+                <div className="border-t border-[#EEE9E4] pt-4 sm:col-span-2">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-[#817771]">
+                    Fler inställningar
+                  </p>
+                </div>
+                <label className="text-xs font-semibold text-[#635C57]">
                   Kategori
                   <select
                     value={action.category ?? "check-in"}
@@ -351,14 +466,14 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                       })
                     }
                     disabled={sent || sending}
-                    className="mt-1.5 w-full rounded-lg border border-[#E5DED8] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                    className="mt-1.5 w-full rounded-xl border border-[#DED6CF] bg-[#FBFAF8] px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-[#078C7A] focus:bg-white focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
                   >
                     {categoryOptions.map((option) => (
                       <option key={option.value} value={option.value}>{option.label}</option>
                     ))}
                   </select>
                 </label>
-                <label className="text-xs font-medium text-muted-foreground">
+                <label className="text-xs font-semibold text-[#635C57]">
                   Uppskattad tid (minuter)
                   <input
                     type="number"
@@ -372,10 +487,10 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                       })
                     }
                     disabled={sent || sending}
-                    className="mt-1.5 w-full rounded-lg border border-[#E5DED8] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                    className="mt-1.5 w-full rounded-xl border border-[#DED6CF] bg-[#FBFAF8] px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-[#078C7A] focus:bg-white focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
                   />
                 </label>
-                <label className="text-xs font-medium text-muted-foreground">
+                <label className="text-xs font-semibold text-[#635C57]">
                   Klinisk vikt
                   <input
                     type="number"
@@ -389,20 +504,20 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                       })
                     }
                     disabled={sent || sending}
-                    className="mt-1.5 w-full rounded-lg border border-[#E5DED8] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                    className="mt-1.5 w-full rounded-xl border border-[#DED6CF] bg-[#FBFAF8] px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-[#078C7A] focus:bg-white focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
                   />
                 </label>
-                <label className="text-xs font-medium text-muted-foreground sm:col-span-2">
+                <label className="text-xs font-semibold text-[#635C57] sm:col-span-2">
                   Förklaring till patienten
                   <textarea
                     value={action.patientReason ?? ""}
                     onChange={(event) => updateAction(i, { patientReason: event.target.value })}
                     disabled={sent || sending}
                     rows={2}
-                    className="mt-1.5 w-full resize-y rounded-lg border border-[#E5DED8] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                    className="mt-1.5 w-full resize-y rounded-xl border border-[#DED6CF] bg-[#FBFAF8] px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-[#078C7A] focus:bg-white focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
                   />
                 </label>
-                <label className="text-xs font-medium text-muted-foreground sm:col-span-2">
+                <label className="text-xs font-semibold text-[#635C57] sm:col-span-2">
                   Hur åtgärden verifieras
                   <input
                     value={action.verificationMethod ?? ""}
@@ -410,18 +525,10 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                       updateAction(i, { verificationMethod: event.target.value })
                     }
                     disabled={sent || sending}
-                    className="mt-1.5 w-full rounded-lg border border-[#E5DED8] bg-white px-3 py-2 text-sm text-foreground outline-none focus:border-[#078C7A] focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
+                    className="mt-1.5 w-full rounded-xl border border-[#DED6CF] bg-[#FBFAF8] px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-[#078C7A] focus:bg-white focus:ring-3 focus:ring-[#078C7A]/10 disabled:opacity-60"
                   />
                 </label>
               </div>
-              <span
-                className={cn(
-                  "mt-3 inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium",
-                  priorityStyle[action.priority],
-                )}
-              >
-                {action.priority} prioritet
-              </span>
             </div>
           )
         })}
