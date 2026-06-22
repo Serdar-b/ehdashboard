@@ -90,11 +90,6 @@ export function PatientQueue({
                       <div className="leading-tight">
                         <div className="flex items-center gap-2">
                           <p className="truncate font-semibold text-[#27221F]">{p.name}</p>
-                          {p.id === "oscar-nilsson" ? (
-                            <span className="rounded-full bg-[#DDF4F1] px-2 py-0.5 text-[10px] font-semibold text-[#078C7A]">
-                              Mobilapp-demo
-                            </span>
-                          ) : null}
                         </div>
                         <p className="truncate text-xs text-[#817771]">
                           {p.age} år · {p.program}
