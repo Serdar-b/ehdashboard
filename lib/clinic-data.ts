@@ -276,13 +276,6 @@ export const kpis = [
     trend: "up" as const,
     accent: "teal" as const,
   },
-  {
-    label: "Sparad läkartid",
-    value: "14,5 h",
-    delta: "denna vecka",
-    trend: "flat" as const,
-    accent: "amber" as const,
-  },
 ]
 
 export type GeneratedAction = {

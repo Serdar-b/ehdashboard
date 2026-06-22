@@ -87,6 +87,14 @@ export function Dashboard() {
               </div>
             ) : null}
 
+            <section id="patient-queue" className="scroll-mt-24">
+              <PatientQueue
+                patients={visiblePatients}
+                selectedId={selected.id}
+                onSelect={(patient) => setSelectedId(patient.id)}
+              />
+            </section>
+
             <ActivePlanSummary
               live={selectedLive}
               onRefresh={() => refreshPatientAdherence(selected.id)}
@@ -96,25 +104,15 @@ export function Dashboard() {
 
             <section
               id="clinical-signal"
-              className="grid scroll-mt-24 grid-cols-1 gap-6 xl:grid-cols-[1fr_0.9fr] 2xl:grid-cols-[1fr_1fr_0.9fr]"
+              className="grid scroll-mt-24 grid-cols-1 items-start gap-6 xl:grid-cols-[1fr_0.9fr] 2xl:grid-cols-[1fr_1fr_0.9fr]"
             >
               <AiSummary patient={selected} />
               <BehaviorAdaptation patient={selected} />
               <MobilePreview sentPlan={sentPlan} />
             </section>
 
-            <section
-              id="patient-queue"
-              className="grid scroll-mt-24 grid-cols-1 items-start gap-6 2xl:grid-cols-[1.45fr_0.8fr]"
-            >
-              <PatientQueue
-                patients={visiblePatients}
-                selectedId={selected.id}
-                onSelect={(patient) => setSelectedId(patient.id)}
-              />
-              <div className="2xl:sticky 2xl:top-24">
-                <PatientDetail patient={selected} />
-              </div>
+            <section className="scroll-mt-24">
+              <PatientDetail patient={selected} />
             </section>
 
             <section id="doctor-input" className="grid scroll-mt-24 grid-cols-1 gap-6">
@@ -166,15 +164,17 @@ function ActivePlanSummary({
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-[#078C7A]">
-              Protocol to Adherence Engine
+              Aktiv patientplan
             </p>
             <h2 className="mt-1 text-xl font-bold tracking-tight text-[#27221F]">
-              {live?.activePlanTitle ?? `Ingen aktiv Supabase-plan för ${patientName}`}
+              {live?.activePlanTitle ?? `Ingen aktiv patientplan för ${patientName}`}
             </h2>
             <p className="mt-1 text-sm text-[#817771]">
               {live
-                ? `Skickad till appen ${formatSentAt(live.sentToAppAt)}`
-                : "Generera och skicka en plan för att koppla läkarens protokoll till patientens vardag."}
+                ? live.sentToAppAt
+                  ? `Skickad till ${patientName}s app ${formatSentAt(live.sentToAppAt)}`
+                  : `Skickad till ${patientName}s app`
+                : "Skapa och skicka en plan för att visa den i patientens app."}
             </p>
           </div>
         </div>

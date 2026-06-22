@@ -20,12 +20,9 @@ export function MobilePreview({ sentPlan }: MobilePreviewProps) {
   return (
     <section className="flex h-full flex-col rounded-xl bg-white p-6 shadow-[0_16px_38px_rgba(59,42,32,0.035)]">
       <div className="text-center">
-        <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+        <p className="text-[11px] font-medium uppercase tracking-wide text-black">
           Patientens vy
         </p>
-        <h2 className="mt-1 text-sm font-semibold text-foreground">
-          Så visas planen i mobilappen
-        </h2>
         {sentPlan ? (
           <div className="mx-auto mt-3 inline-flex items-center gap-2 rounded-full border border-[#BCE9E2] bg-[#F0FAF8] px-3 py-1.5 text-xs font-semibold text-[#078C7A]">
             <span className="size-1.5 rounded-full bg-[#078C7A]" />
@@ -96,12 +93,6 @@ export function MobilePreview({ sentPlan }: MobilePreviewProps) {
           />
         )}
       </div>
-
-      <p className="mx-auto mt-5 max-w-[320px] text-center text-xs leading-relaxed text-muted-foreground text-pretty">
-        {sentPlan
-          ? "Förhandsvisningen visar exakt de åtgärder läkaren just godkände."
-          : "Exempel på patientens mobilvy före nästa utskick."}
-      </p>
     </section>
   )
 }

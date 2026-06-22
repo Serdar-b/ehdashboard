@@ -23,11 +23,8 @@ export function Topbar() {
 
       <div className="hidden min-w-[150px] lg:block">
         <h1 className="text-[28px] font-bold tracking-tight text-[#27221F]">
-          Protocol to Adherence
+          Protocol to Adherence Engine
         </h1>
-        <p className="mt-0.5 text-xs font-semibold uppercase tracking-wide text-[#078C7A]">
-          Riskkontroll för patientgapet
-        </p>
       </div>
 
       <div className="ml-auto flex shrink-0 items-center gap-2">

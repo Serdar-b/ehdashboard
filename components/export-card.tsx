@@ -51,9 +51,6 @@ export function ExportCard({ patient }: { patient: Patient }) {
           <h2 className="text-sm font-semibold text-foreground">
             Export till journalsystem
           </h2>
-          <p className="text-xs text-muted-foreground">
-            Filtrerad klinisk signal för vald patient
-          </p>
         </div>
       </div>
 

@@ -164,23 +164,12 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
           <h2 className="text-sm font-semibold text-foreground">
             Läkarens AI-input
           </h2>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-md text-muted-foreground">
             Journalanteckningen omvandlas till strukturerade dagliga mikrohandlingar
           </p>
         </div>
       </div>
 
-      <div
-        className={`mb-4 rounded-xl px-3 py-2 text-xs font-medium ${
-          patient.id === "oscar-nilsson"
-            ? "border border-[#BCE9E2] bg-[#F0FAF8] text-[#078C7A]"
-            : "border border-[#F7D982] bg-[#FFF0C7] text-[#9A4B22]"
-        }`}
-      >
-        {patient.id === "oscar-nilsson"
-          ? "Ansluten live-demo: Oscar Nilssons mobilapp"
-          : "Den anslutna live-demoappen är kopplad till Oscar Nilsson. Välj Oscar för att visa flödet i mobilen."}
-      </div>
 
       <textarea
         value={note}

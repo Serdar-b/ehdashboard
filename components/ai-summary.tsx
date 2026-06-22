@@ -22,7 +22,7 @@ export function AiSummary({ patient }: { patient: Patient }) {
           </div>
           <div className="leading-tight">
             <h2 className="text-sm font-semibold text-foreground">
-              Klinisk signal
+              AI sammanfattning
             </h2>
             <p className="text-xs text-muted-foreground">
               {patient.name} · filtrerad från patientens vardag

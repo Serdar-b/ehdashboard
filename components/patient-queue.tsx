@@ -24,7 +24,7 @@ export function PatientQueue({
       <div className="mb-5 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-[22px] font-bold tracking-tight text-[#27221F]">
-            Riskkontroll för health coaches
+            Riskkontroll för läkare
           </h2>
           <p className="mt-1 text-sm text-[#817771]">
             Sorterad efter klinisk signal och kontinuitetsindex

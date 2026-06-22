@@ -1,4 +1,4 @@
-import { ArrowUpRight, CalendarCheck, ClipboardList, FileText, Users } from "lucide-react"
+import { ArrowUpRight, ClipboardList, FileText, Users } from "lucide-react"
 import { kpis } from "@/lib/clinic-data"
 import { cn } from "@/lib/utils"
 
@@ -6,22 +6,20 @@ const cardTone: Record<string, string> = {
   info: "bg-[#078C7A] text-white shadow-[0_18px_40px_rgba(7,140,122,0.18)]",
   coral: "bg-white text-[#27221F]",
   teal: "bg-white text-[#27221F]",
-  amber: "bg-white text-[#27221F]",
 }
 
 const iconTone: Record<string, string> = {
   info: "bg-white/90 text-[#078C7A]",
   coral: "bg-[#F8D8CC] text-[#D94E25]",
   teal: "bg-[#DDF4F1] text-[#078C7A]",
-  amber: "bg-[#FFF0C7] text-[#B86D00]",
 }
 
 export function KpiCards() {
-  const icons = [Users, FileText, ClipboardList, CalendarCheck]
+  const icons = [Users, FileText, ClipboardList]
 
   return (
     <section className="grid grid-cols-1 gap-6 xl:grid-cols-[0.95fr_1fr]">
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
         {kpis.map((kpi, index) => {
           const Icon = icons[index]
           const active = kpi.accent === "info"

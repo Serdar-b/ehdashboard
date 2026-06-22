@@ -12,8 +12,8 @@ import { cn } from "@/lib/utils"
 
 const nav = [
   { label: "Översikt", icon: LayoutDashboard, href: "#overview", active: true },
-  { label: "Klinisk signal", icon: Sparkles, href: "#clinical-signal" },
   { label: "Patientkö", icon: Users, href: "#patient-queue" },
+  { label: "Klinisk signal", icon: Sparkles, href: "#clinical-signal" },
   { label: "AI-input", icon: ClipboardPenLine, href: "#doctor-input" },
   { label: "Export", icon: FileOutput, href: "#export" },
 ]
@@ -28,9 +28,6 @@ export function Sidebar() {
         <div className="leading-tight">
           <p className="text-base font-bold text-[#27221F]">
             Executive Health
-          </p>
-          <p className="text-[11px] font-medium text-[#817771]">
-            Protocol to Adherence
           </p>
         </div>
       </div>
