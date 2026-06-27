@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import type { Patient } from "@/lib/clinic-data"
 import { StatusBadge } from "@/components/status-badge"
@@ -24,10 +24,10 @@ export function PatientQueue({
       <div className="mb-5 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-[22px] font-bold tracking-tight text-[#27221F]">
-            Riskkontroll för läkare
+            Clinical Risk Overview
           </h2>
           <p className="mt-1 text-sm text-[#817771]">
-            Sorterad efter klinisk signal och kontinuitetsindex
+            Sorted by clinical signal and continuity index
           </p>
         </div>
       </div>
@@ -49,9 +49,9 @@ export function PatientQueue({
               </th>
               <th className="px-3 py-3 font-semibold">Patient</th>
               <th className="px-4 py-3 font-semibold">Signal</th>
-              <th className="px-4 py-3 font-semibold">Kontinuitetsindex</th>
-              <th className="px-4 py-3 font-semibold">Senaste incheckning</th>
-              <th className="px-4 py-3 font-semibold">Föreslagen åtgärd</th>
+              <th className="px-4 py-3 font-semibold">Continuity Index</th>
+              <th className="px-4 py-3 font-semibold">Last Check-in</th>
+              <th className="px-4 py-3 font-semibold">Suggested Action</th>
             </tr>
           </thead>
           <tbody>
@@ -92,7 +92,7 @@ export function PatientQueue({
                           <p className="truncate font-semibold text-[#27221F]">{p.name}</p>
                         </div>
                         <p className="truncate text-xs text-[#817771]">
-                          {p.age} år · {p.program}
+                          {p.age} y/o · {p.program}
                         </p>
                       </div>
                     </div>

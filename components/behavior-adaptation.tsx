@@ -10,13 +10,13 @@ import type { BehaviorAdaptation, Patient } from "@/lib/clinic-data"
 const fallbackAdaptation: BehaviorAdaptation = {
   active: false,
   missedDays: 0,
-  trigger: "Ingen avvikelse upptäckt",
-  originalAction: "Nuvarande patientplan",
-  adaptedAction: "Behåll nuvarande tröskel",
-  threshold: "Adaptation vilande",
+  trigger: "No deviation detected",
+  originalAction: "Current patient plan",
+  adaptedAction: "Keep current threshold",
+  threshold: "Adaptation idle",
   reason:
-    "Patienten har tillräcklig kontinuitet för att behålla planens nuvarande nivå.",
-  coachAction: "Fortsätt bevaka signalen.",
+    "The patient has sufficient continuity to maintain the plan at its current level.",
+  coachAction: "Continue monitoring the signal.",
 }
 
 export function BehaviorAdaptation({ patient }: { patient: Patient }) {
@@ -42,10 +42,10 @@ export function BehaviorAdaptation({ patient }: { patient: Patient }) {
           </div>
           <div className="leading-tight">
             <h2 className="text-sm font-semibold text-foreground">
-              Beteendeadaptation
+              Plan Adaptation
             </h2>
             <p className="text-xs text-muted-foreground">
-              Kontinuitet över perfektion
+              Continuity over perfection
             </p>
           </div>
         </div>
@@ -57,7 +57,7 @@ export function BehaviorAdaptation({ patient }: { patient: Patient }) {
               : "rounded-full border border-[#BCE9E2] bg-[#F0FAF8] px-2.5 py-1 text-[11px] font-semibold text-[#078C7A]"
           }
         >
-          {active ? "Aktiverad" : "Vilande"}
+          {active ? "Active" : "Idle"}
         </span>
       </div>
 
@@ -75,8 +75,8 @@ export function BehaviorAdaptation({ patient }: { patient: Patient }) {
             </p>
             <p className="mt-1 text-xs leading-5 text-[#817771]">
               {adaptation.missedDays > 0
-                ? `${adaptation.missedDays} missade dagar i följd`
-                : "Ingen missad dag i följd"}
+                ? `${adaptation.missedDays} missed days in a row`
+                : "No consecutive missed days"}
             </p>
           </div>
         </div>
@@ -85,7 +85,7 @@ export function BehaviorAdaptation({ patient }: { patient: Patient }) {
       <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto_1fr] md:items-stretch">
         <div className="rounded-xl bg-[#F8F0EB] p-4">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-[#817771]">
-            Ursprunglig åtgärd
+            Original Action
           </p>
           <p className="mt-2 text-sm font-semibold leading-5 text-[#27221F]">
             {adaptation.originalAction}
@@ -100,7 +100,7 @@ export function BehaviorAdaptation({ patient }: { patient: Patient }) {
 
         <div className="rounded-xl bg-[#F0FAF8] p-4">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-[#078C7A]">
-            Anpassad tröskel
+            Adapted Threshold
           </p>
           <p className="mt-2 text-sm font-semibold leading-5 text-[#27221F]">
             {adaptation.adaptedAction}
@@ -122,7 +122,7 @@ export function BehaviorAdaptation({ patient }: { patient: Patient }) {
 
       <div className="mt-auto pt-4">
         <p className="text-[11px] font-semibold uppercase tracking-wide text-[#817771]">
-          Nästa coach-åtgärd
+          Next Coach Action
         </p>
         <p className="mt-1 text-sm font-semibold text-[#27221F]">
           {adaptation.coachAction}

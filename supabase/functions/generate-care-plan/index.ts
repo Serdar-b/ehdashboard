@@ -1,7 +1,7 @@
-﻿import OpenAI from "https://esm.sh/openai@4.26.0";
+import OpenAI from "https://esm.sh/openai@4.26.0";
 
 type ActionCategory = "movement" | "nutrition" | "medication" | "measurement" | "check-in";
-type Priority = "Hög" | "Medel" | "Låg";
+type Priority = "High" | "Medium" | "Low";
 
 type GeneratedAction = {
   title: string;
@@ -37,7 +37,7 @@ const categories = new Set<ActionCategory>([
   "measurement",
   "check-in",
 ]);
-const priorities = new Set<Priority>(["Hög", "Medel", "Låg"]);
+const priorities = new Set<Priority>(["High", "Medium", "Low"]);
 
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -69,21 +69,21 @@ function normalizeAction(value: unknown): GeneratedAction | null {
     : "check-in";
   const priority = typeof row.priority === "string" && priorities.has(row.priority as Priority)
     ? (row.priority as Priority)
-    : "Medel";
+    : "Medium";
 
   return {
     title,
-    cadence: safeString(row.cadence, "Dagligen", 40),
+    cadence: safeString(row.cadence, "Daily", 40),
     priority,
     category,
     estimatedMinutes: clampNumber(row.estimatedMinutes, 3, 1, 180),
     clinicalWeight: clampNumber(row.clinicalWeight, 20, 1, 100),
     patientReason: safeString(
       row.patientReason,
-      "Kopplar läkarens rekommendation till en konkret vardagshandling.",
+      "Links the doctor's recommendation to a concrete daily action.",
       220,
     ),
-    verificationMethod: safeString(row.verificationMethod, "Patientbekräftelse", 80),
+    verificationMethod: safeString(row.verificationMethod, "Patient confirmation", 80),
   };
 }
 
@@ -107,13 +107,13 @@ function normalizeAiResponse(value: unknown, request: GenerateCarePlanRequest) {
 
   return {
     plan: {
-      title: safeString(parsed.title, `${request.patient?.program ?? "Klinisk"} - daglig plan`, 90),
-      goal: safeString(parsed.goal, request.patient?.goal ?? "Öka kontinuitet till läkarens plan.", 180),
-      riskArea: safeString(parsed.riskArea, request.patient?.riskArea ?? "Preventiv uppföljning", 90),
+      title: safeString(parsed.title, `${request.patient?.program ?? "Clinical"} - daily plan`, 90),
+      goal: safeString(parsed.goal, request.patient?.goal ?? "Increase continuity with the doctor's plan.", 180),
+      riskArea: safeString(parsed.riskArea, request.patient?.riskArea ?? "Preventive follow-up", 90),
       durationWeeks: clampNumber(parsed.durationWeeks, 12, 1, 52),
       summary: safeString(
         parsed.summary,
-        "Läkarens anteckning har strukturerats till dagliga patientåtgärder.",
+        "The clinical note has been structured into daily patient actions.",
         300,
       ),
       actions,
@@ -140,45 +140,45 @@ Deno.serve(async (req: Request) => {
     const model = Deno.env.get("AI_MODEL") ?? "openai/gpt-4.1";
 
     const systemPrompt = `
-You are the Protocol to Adherence Engine for Executive Health.
+You are the Protocol to Adherence Engine.
 Return strict JSON only. No markdown, no comments, no extra text.
 
-Transform a Swedish clinical note into practical patient actions for a premium preventive-health app.
+Transform a clinical note into practical patient actions for a premium preventive-health app.
 Rules:
-- Write patient-facing text in Swedish.
+- Write patient-facing text in English.
 - Keep actions concrete and doable today.
 - Prefer continuity over perfection.
 - Do not give diagnosis or emergency advice.
 - Create the actions needed to represent the clinician's note accurately.
-- priority must be one of: "Hög", "Medel", "Låg".
+- priority must be one of: "High", "Medium", "Low".
 - category must be one of: "movement", "nutrition", "medication", "measurement", "check-in".
 - estimatedMinutes must be a positive integer.
 - clinicalWeight must be 1-100, where high-value clinical actions are 25-40.
 
 Return exactly this JSON shape. The example values show allowed formats:
 {
-  "title": "Kardiometabol - daglig plan",
-  "goal": "Sänka ApoB och förbättra metabol hälsa",
-  "riskArea": "Hjärt-kärlprevention",
+  "title": "Cardiometabolic - daily plan",
+  "goal": "Lower ApoB and improve metabolic health",
+  "riskArea": "Cardiovascular prevention",
   "durationWeeks": 12,
-  "summary": "Planen fokuserar på rörelse, tillskott och blodtrycksuppföljning.",
+  "summary": "The plan focuses on movement, supplements, and blood pressure follow-up.",
   "actions": [
     {
-      "title": "30 min zon 2-promenad",
-      "cadence": "5 ggr/vecka",
-      "priority": "Hög",
+      "title": "30 min zone 2 walk",
+      "cadence": "5x/week",
+      "priority": "High",
       "category": "movement",
       "estimatedMinutes": 30,
       "clinicalWeight": 30,
-      "patientReason": "Stödjer hjärt-kärlplanen med låg återhämtningskostnad.",
-      "verificationMethod": "Patientbekräftelse"
+      "patientReason": "Supports the cardiovascular plan with low recovery cost.",
+      "verificationMethod": "Patient confirmation"
     }
   ]
 }`;
 
     const userPrompt = `
-Patient: ${body.patient?.name ?? "patienten"}
-Program: ${body.patient?.program ?? "Executive Health"}
+Patient: ${body.patient?.name ?? "the patient"}
+Program: ${body.patient?.program ?? "Preventive health"}
 Known goal: ${body.patient?.goal ?? "not provided"}
 Known risk area: ${body.patient?.riskArea ?? "not provided"}
 

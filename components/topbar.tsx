@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useState } from "react"
 import { ChevronDown, Activity } from "lucide-react"
@@ -6,7 +6,7 @@ import { ChevronDown, Activity } from "lucide-react"
 export function Topbar() {
   const [open, setOpen] = useState(false)
 
-  const today = new Intl.DateTimeFormat("sv-SE", {
+  const today = new Intl.DateTimeFormat("en-US", {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -18,12 +18,12 @@ export function Topbar() {
         <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
           <Activity className="size-4.5" />
         </div>
-        <span className="text-sm font-semibold">Executive Health</span>
+        <span className="text-sm font-semibold">Clinical Dashboard</span>
       </div>
 
       <div className="hidden min-w-[150px] lg:block">
         <h1 className="text-[28px] font-bold tracking-tight text-[#27221F]">
-          Protocol to Adherence Engine
+          Protocol to Adherence
         </h1>
       </div>
 
@@ -60,7 +60,7 @@ export function Topbar() {
                 role="menu"
                 className="absolute right-0 top-14 z-20 w-52 overflow-hidden rounded-xl border border-[#EEE9E4] bg-white p-1.5 shadow-lg"
               >
-                {["Min profil", "Notisinställningar", "Teamöversikt", "Logga ut"].map(
+                {["My Profile", "Notification Settings", "Team Overview", "Log Out"].map(
                   (item) => (
                     <button
                       key={item}

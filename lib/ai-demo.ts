@@ -5,14 +5,13 @@ import type {
 } from "@/lib/clinic-data"
 
 const numberWords: Record<string, number> = {
-  en: 1,
-  ett: 1,
-  två: 2,
-  tre: 3,
-  fyra: 4,
-  fem: 5,
-  sex: 6,
-  sju: 7,
+  one: 1,
+  two: 2,
+  three: 3,
+  four: 4,
+  five: 5,
+  six: 6,
+  seven: 7,
 }
 
 function parseNumber(value?: string) {
@@ -20,22 +19,22 @@ function parseNumber(value?: string) {
   return Number(value) || numberWords[value.toLowerCase()] || null
 }
 
-function weeklyCadence(text: string, fallback = "Enligt plan") {
-  if (/dagligen|varje dag|om dagen/i.test(text)) return "Dagligen"
+function weeklyCadence(text: string, fallback = "As prescribed") {
+  if (/daily|every day|per day/i.test(text)) return "Daily"
 
   const match = text.match(
-    /(\d+|en|ett|två|tre|fyra|fem|sex|sju)\s*(?:gånger|ggr|morgnar|kvällar)\s*(?:i|per)\s*veck(?:a|an)/i,
+    /(\d+|one|two|three|four|five|six|seven)\s*(?:times|mornings|evenings)\s*(?:a|per)\s*week/i,
   )
   const count = parseNumber(match?.[1])
 
-  return count ? `${count} ggr/vecka` : fallback
+  return count ? `${count}x/week` : fallback
 }
 
 function action(
   values: GeneratedAction,
 ): GeneratedAction {
   return {
-    verificationMethod: "Patientbekräftelse",
+    verificationMethod: "Patient confirmation",
     ...values,
   }
 }
@@ -43,69 +42,69 @@ function action(
 function parseClause(clause: string): GeneratedAction | null {
   const text = clause
     .trim()
-    .replace(/^patienten\s+(?:ska|bör)\s+/i, "")
-    .replace(/^ordinera\s+/i, "")
+    .replace(/^the patient\s+(?:should|must)\s+/i, "")
+    .replace(/^prescribe\s+/i, "")
   const normalized = text.toLowerCase()
 
-  if (!text || normalized.startsWith("uppföljning om")) return null
+  if (!text || normalized.startsWith("follow-up in")) return null
 
-  const stepMatch = text.match(/(\d[\d\s.]*)\s*steg/i)
+  const stepMatch = text.match(/(\d[\d\s,.]*)\s*steps/i)
   if (stepMatch) {
-    const stepCount = Number(stepMatch[1].replace(/[\s.]/g, ""))
-    const formattedSteps = new Intl.NumberFormat("sv-SE").format(stepCount)
+    const stepCount = Number(stepMatch[1].replace(/[\s,.]/g, ""))
+    const formattedSteps = new Intl.NumberFormat("en-US").format(stepCount)
     return action({
-      title: `Gå ${formattedSteps} steg`,
-      cadence: weeklyCadence(text, "Dagligen"),
-      priority: "Medel",
+      title: `Walk ${formattedSteps} steps`,
+      cadence: weeklyCadence(text, "Daily"),
+      priority: "Medium",
       category: "movement",
       estimatedMinutes: 45,
       clinicalWeight: 20,
-      patientReason: "Gör den dagliga rörelsen tydlig och enkel att följa.",
+      patientReason: "Makes daily movement clear and easy to follow.",
     })
   }
 
-  if (normalized.includes("zon 2")) {
+  if (normalized.includes("zone 2")) {
     const minuteMatch = text.match(/(\d+)\s*min/i)
     const minutes = minuteMatch ? Number(minuteMatch[1]) : 30
     return action({
-      title: minuteMatch ? `${minutes} min zon 2-promenad` : "Promenera i zon 2",
-      cadence: weeklyCadence(text, "5 ggr/vecka"),
-      priority: "Hög",
+      title: minuteMatch ? `${minutes} min zone 2 walk` : "Zone 2 walk",
+      cadence: weeklyCadence(text, "5x/week"),
+      priority: "High",
       category: "movement",
       estimatedMinutes: minutes,
       clinicalWeight: 30,
-      patientReason: "Stödjer hjärt-kärlplanen med regelbunden rörelse.",
+      patientReason: "Supports the cardiovascular plan with regular movement.",
     })
   }
 
-  if (normalized.includes("omega") || normalized.includes("tillskott")) {
+  if (normalized.includes("omega") || normalized.includes("supplement")) {
     return action({
-      title: normalized.includes("omega") ? "Ta omega-3 med mat" : text,
-      cadence: weeklyCadence(text, "Dagligen"),
-      priority: "Hög",
+      title: normalized.includes("omega") ? "Take omega-3 with food" : text,
+      cadence: weeklyCadence(text, "Daily"),
+      priority: "High",
       category: "medication",
       estimatedMinutes: 1,
       clinicalWeight: 25,
-      patientReason: "Hjälper dig att hålla den ordinerade rutinen i vardagen.",
+      patientReason: "Helps you maintain the prescribed routine in daily life.",
     })
   }
 
-  if (normalized.includes("blodtryck")) {
+  if (normalized.includes("blood pressure")) {
     return action({
-      title: "Logga blodtryck",
-      cadence: weeklyCadence(text, "3 ggr/vecka"),
-      priority: "Hög",
+      title: "Log blood pressure",
+      cadence: weeklyCadence(text, "3x/week"),
+      priority: "High",
       category: "measurement",
       estimatedMinutes: 3,
       clinicalWeight: 30,
-      patientReason: "Ger kliniken en tydlig signal mellan besöken.",
+      patientReason: "Gives the clinic a clear signal between visits.",
     })
   }
 
   const cleanedTitle = text
-    .replace(/\s+(?:dagligen|varje dag|om dagen)$/i, "")
+    .replace(/\s+(?:daily|every day|per day)$/i, "")
     .replace(
-      /\s+(?:\d+|en|ett|två|tre|fyra|fem|sex|sju)\s*(?:gånger|ggr|morgnar|kvällar)\s*(?:i|per)\s*veck(?:a|an)$/i,
+      /\s+(?:\d+|one|two|three|four|five|six|seven)\s*(?:times|mornings|evenings)\s*(?:a|per)\s*week$/i,
       "",
     )
     .trim()
@@ -115,17 +114,17 @@ function parseClause(clause: string): GeneratedAction | null {
   return action({
     title: cleanedTitle.charAt(0).toUpperCase() + cleanedTitle.slice(1),
     cadence: weeklyCadence(text),
-    priority: "Medel",
+    priority: "Medium",
     category: "check-in",
     estimatedMinutes: 5,
     clinicalWeight: 20,
-    patientReason: "Gör läkarens rekommendation konkret och möjlig att följa upp.",
+    patientReason: "Makes the doctor's recommendation concrete and actionable.",
   })
 }
 
 function splitInstructions(note: string) {
   return note.split(
-    /[.;\n]+|,\s*(?=(?:ta|logga|mäta|mät|gå|promenera|drick|ät|sov|gör)\b)|\s+och\s+(?=(?:ta|logga|mäta|mät|gå|promenera|drick|ät|sov|gör)\b)/i,
+    /[.;\n]+|,\s*(?=(?:take|log|measure|walk|drink|eat|sleep|do)\b)|\s+and\s+(?=(?:take|log|measure|walk|drink|eat|sleep|do)\b)/i,
   )
 }
 
@@ -143,26 +142,26 @@ export function generateDemoCarePlan(note: string, patient: Patient): GeneratedP
   if (actions.length === 0) {
     actions.push(
       action({
-        title: "Daglig patientavstämning",
-        cadence: "Dagligen",
-        priority: "Medel",
+        title: "Daily patient check-in",
+        cadence: "Daily",
+        priority: "Medium",
         category: "check-in",
         estimatedMinutes: 2,
         clinicalWeight: 20,
-        patientReason: "Håller planen aktiv med en enkel daglig avstämning.",
+        patientReason: "Keeps the plan active with a simple daily check-in.",
       }),
     )
   }
 
-  const durationMatch = note.match(/(\d+)\s*veck/i)
+  const durationMatch = note.match(/(\d+)\s*week/i)
   const firstName = patient.name.split(" ")[0]
 
   return {
-    title: `${firstName}s dagliga plan`,
-    goal: "Göra läkarens rekommendationer enklare att följa varje dag.",
+    title: `${firstName}'s daily plan`,
+    goal: "Make the doctor's recommendations easier to follow every day.",
     riskArea: patient.program,
     durationWeeks: durationMatch ? Number(durationMatch[1]) : 12,
-    summary: `Planen innehåller ${actions.length} konkreta handlingar från läkarens anteckning.`,
+    summary: `The plan contains ${actions.length} concrete actions from the clinical note.`,
     actions,
   }
 }
@@ -171,5 +170,5 @@ export function createSendConfirmation(
   patient: Patient,
   actions: GeneratedAction[],
 ) {
-  return `Plan skickad till ${patient.name}. Patientappen uppdateras med ${actions.length} dagliga åtgärder.`
+  return `Plan sent to ${patient.name}. Patient app updated with ${actions.length} daily actions.`
 }

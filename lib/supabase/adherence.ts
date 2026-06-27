@@ -35,69 +35,69 @@ function startOfTodayIso() {
 function priorityWeight(priority: string, clinicalWeight?: number | null) {
   if (typeof clinicalWeight === "number" && clinicalWeight > 0) return clinicalWeight
   const normalized = priority.toLowerCase()
-  if (normalized === "hög" || normalized === "high") return 30
-  if (normalized === "låg" || normalized === "low") return 10
+  if (normalized === "high" || normalized === "hög") return 30
+  if (normalized === "low" || normalized === "låg") return 10
   return 20
 }
 
 function signalFromScore(score: number): Signal {
-  if (score >= 80) return "Stabil"
-  if (score >= 55) return "Bevaka"
-  return "Kritisk"
+  if (score >= 80) return "Stable"
+  if (score >= 55) return "Monitor"
+  return "Critical"
 }
 
 function relativeCheckInLabel(checkIns: CheckInRow[]) {
   const latest = checkIns[0]?.created_at
-  if (!latest) return "ingen idag"
+  if (!latest) return "none today"
 
   const diffMs = Date.now() - new Date(latest).getTime()
   const diffMinutes = Math.max(0, Math.round(diffMs / 60000))
 
-  if (diffMinutes < 2) return "nyss"
-  if (diffMinutes < 60) return `för ${diffMinutes} min sedan`
+  if (diffMinutes < 2) return "just now"
+  if (diffMinutes < 60) return `${diffMinutes} min ago`
 
   const diffHours = Math.round(diffMinutes / 60)
-  return diffHours <= 1 ? "för 1 timme sedan" : `för ${diffHours} timmar sedan`
+  return diffHours <= 1 ? "1 hour ago" : `${diffHours} hours ago`
 }
 
 function createRecommendation(signal: Signal, missedActions: string[]) {
-  if (signal === "Stabil") {
-    return "Behåll nuvarande plan"
+  if (signal === "Stable") {
+    return "Keep current plan"
   }
 
   if (
     missedActions.some((action) => {
       const normalized = action.toLowerCase()
       return (
-        normalized.includes("promenad") ||
-        normalized.includes("zon 2") ||
-        normalized.includes("steg") ||
-        normalized.includes("rörelse")
+        normalized.includes("walk") ||
+        normalized.includes("zone 2") ||
+        normalized.includes("step") ||
+        normalized.includes("exercise")
       )
     })
   ) {
-    return "Förenkla rörelseplan"
+    return "Simplify exercise plan"
   }
 
-  if (signal === "Kritisk") {
-    return "Kontakta patienten idag"
+  if (signal === "Critical") {
+    return "Contact patient today"
   }
 
-  return "Skicka kontinuitetsstöd"
+  return "Send continuity support"
 }
 
 function createAiRecommendation(signal: Signal, adherence: number, missedActions: string[]) {
-  if (signal === "Stabil") {
-    return "Patienten håller dagens kontinuitet. Fortsätt med automatiserad förstärkning och behåll nuvarande nivå."
+  if (signal === "Stable") {
+    return "The patient is maintaining today's continuity. Continue with automated reinforcement and keep the current level."
   }
 
-  const missed = missedActions.length > 0 ? missedActions.join(", ") : "dagens åtgärder"
+  const missed = missedActions.length > 0 ? missedActions.join(", ") : "today's actions"
 
-  if (signal === "Kritisk") {
-    return `Dagens kontinuitetsindex är ${adherence} %. Prioritera uppföljning och förenkla planen runt: ${missed}.`
+  if (signal === "Critical") {
+    return `Today's continuity index is ${adherence}%. Prioritize follow-up and simplify the plan around: ${missed}.`
   }
 
-  return `Dagens kontinuitetsindex är ${adherence} %. Skicka beteendestöd och fokusera nästa steg på: ${missed}.`
+  return `Today's continuity index is ${adherence}%. Send behavioral support and focus next steps on: ${missed}.`
 }
 
 function createBehaviorAdaptation(
@@ -108,49 +108,49 @@ function createBehaviorAdaptation(
     missedActions.find((action) => {
       const normalized = action.toLowerCase()
       return (
-        normalized.includes("promenad") ||
-        normalized.includes("zon 2") ||
-        normalized.includes("steg") ||
-        normalized.includes("rörelse")
+        normalized.includes("walk") ||
+        normalized.includes("zone 2") ||
+        normalized.includes("step") ||
+        normalized.includes("exercise")
       )
     }) ?? missedActions[0]
 
-  if (!movementAction || signal === "Stabil") {
+  if (!movementAction || signal === "Stable") {
     return {
       active: false,
       missedDays: 0,
-      trigger: "Kontinuiteten håller idag",
-      originalAction: "Nuvarande patientplan",
-      adaptedAction: "Ingen sänkning, behåll rytm",
-      threshold: "Adaptation vilande",
+      trigger: "Continuity is holding today",
+      originalAction: "Current patient plan",
+      adaptedAction: "No reduction, maintain rhythm",
+      threshold: "Adaptation idle",
       reason:
-        "Patienten håller tillräcklig kontinuitet för att systemet ska fortsätta med nuvarande nivå.",
-      coachAction: "Behåll plan och fortsätt bevaka signalen.",
+        "The patient has sufficient continuity for the system to continue at the current level.",
+      coachAction: "Keep plan and continue monitoring the signal.",
     }
   }
 
-  const isMovement = movementAction !== missedActions[0] || /promenad|zon 2|steg|rörelse/i.test(movementAction)
+  const isMovement = movementAction !== missedActions[0] || /walk|zone 2|step|exercise/i.test(movementAction)
 
   return {
     active: true,
-    missedDays: signal === "Kritisk" ? 2 : 1,
+    missedDays: signal === "Critical" ? 2 : 1,
     trigger:
-      signal === "Kritisk"
-        ? "Missade högvärdesåtgärder idag"
-        : "Kontinuitetsrisk upptäckt",
+      signal === "Critical"
+        ? "Missed high-value actions today"
+        : "Continuity risk detected",
     originalAction: movementAction,
     adaptedAction: isMovement
-      ? "5 min återstart räcker idag"
-      : "En kärnåtgärd räcker för att starta om rytmen",
+      ? "5 min restart is enough for today"
+      : "One core action is enough to restart the rhythm",
     threshold: isMovement
-      ? "Tröskel sänkt från full rörelseplan till återstart"
-      : "Tröskel sänkt till minsta meningsfulla handling",
+      ? "Threshold lowered from full exercise plan to restart"
+      : "Threshold lowered to smallest meaningful action",
     reason:
-      "Systemet prioriterar återupptagen kontinuitet före perfekt genomförande när patienten riskerar att falla ur planen.",
+      "The system prioritizes resumed continuity over perfect execution when the patient is at risk of dropping out of the plan.",
     coachAction:
-      signal === "Kritisk"
-        ? "Kontakta patienten och bekräfta den sänkta tröskeln."
-        : "Skicka beteendestöd och följ upp nästa incheckning.",
+      signal === "Critical"
+        ? "Contact the patient and confirm the lowered threshold."
+        : "Send behavioral support and follow up on next check-in.",
   }
 }
 
@@ -158,7 +158,7 @@ function mergeLivePatient(patient: Patient, live: LiveAdherence): Patient {
   return {
     ...patient,
     adherence: live.adherence,
-    missedActions: live.missedActions.length > 0 ? live.missedActions : ["Inga missade högvärdesåtgärder"],
+    missedActions: live.missedActions.length > 0 ? live.missedActions : ["No missed high-value actions"],
     missedHighValue: live.missedHighValue,
     lastCheckIn: live.lastCheckIn,
     signal: live.signal,
@@ -260,15 +260,15 @@ export async function fetchLiveAdherence(patientId: string): Promise<LiveAdheren
     missedActions,
     missedHighValue:
       missedActions.length > 0
-        ? `Missat ${missedActions.slice(0, 2).join(" och ")}`
-        : "Följer dagens plan",
+        ? `Missed ${missedActions.slice(0, 2).join(" and ")}`
+        : "Following today's plan",
     lastCheckIn: relativeCheckInLabel(checkInRows),
     signal,
     suggestedAction,
     friction:
       missedActions.length > 0
-        ? `Dagens friktion verkar ligga kring ${missedActions[0].toLowerCase()}.`
-        : "Inga rapporterade hinder idag.",
+        ? `Today's friction appears to be around ${missedActions[0].toLowerCase()}.`
+        : "No reported obstacles today.",
     aiRecommendation: createAiRecommendation(signal, adherence, missedActions),
     weekAdherence: [50, 60, 55, 70, 65, adherence, adherence],
     activeActionCount: actionRows.length,

@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import {
   ClipboardPenLine,
@@ -11,10 +11,10 @@ import {
 import { cn } from "@/lib/utils"
 
 const nav = [
-  { label: "Översikt", icon: LayoutDashboard, href: "#overview", active: true },
-  { label: "Patientkö", icon: Users, href: "#patient-queue" },
-  { label: "Klinisk signal", icon: Sparkles, href: "#clinical-signal" },
-  { label: "AI-input", icon: ClipboardPenLine, href: "#doctor-input" },
+  { label: "Overview", icon: LayoutDashboard, href: "#overview", active: true },
+  { label: "Patient Queue", icon: Users, href: "#patient-queue" },
+  { label: "Clinical Signal", icon: Sparkles, href: "#clinical-signal" },
+  { label: "AI Input", icon: ClipboardPenLine, href: "#doctor-input" },
   { label: "Export", icon: FileOutput, href: "#export" },
 ]
 
@@ -27,7 +27,7 @@ export function Sidebar() {
         </div>
         <div className="leading-tight">
           <p className="text-base font-bold text-[#27221F]">
-            Executive Health
+            Clinical Dashboard
           </p>
         </div>
       </div>
@@ -54,10 +54,10 @@ export function Sidebar() {
       <div className="px-5 pb-6">
         <div className="rounded-xl bg-[#FBFAF8] px-4 py-3">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-[#078C7A]">
-            Demo-flöde
+            Demo Flow
           </p>
           <p className="mt-1 text-xs leading-5 text-[#817771]">
-            Anteckning → mikrohandlingar → patientapp → klinisk signal.
+            Note → micro-actions → patient app → clinical signal.
           </p>
         </div>
       </div>

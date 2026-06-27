@@ -81,7 +81,7 @@ export async function saveGeneratedPlan({
     if (planError) throw planError
   }
 
-  if (!carePlan) throw new Error("Vårdplanen kunde inte sparas.")
+  if (!carePlan) throw new Error("The care plan could not be saved.")
 
   const rows = plan.actions.map((action, index) => ({
     care_plan_id: carePlan.id,

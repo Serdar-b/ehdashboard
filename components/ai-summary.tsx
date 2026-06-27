@@ -2,7 +2,7 @@ import { Brain, ShieldCheck } from "lucide-react"
 import type { Patient } from "@/lib/clinic-data"
 
 function createSummary(patient: Patient) {
-  return `${patient.name} har ${patient.adherence} % kontinuitetsindex de senaste 7 dagarna. Aktuell klinisk signal är ${patient.signal.toLowerCase()}. Huvudmönster: ${patient.missedHighValue.toLowerCase()}. Beteendefriktion: ${patient.friction.toLowerCase()} Rekommenderad åtgärd: ${patient.aiRecommendation}`
+  return `${patient.name} has a ${patient.adherence}% continuity index over the past 7 days. Current clinical signal is ${patient.signal.toLowerCase()}. Main pattern: ${patient.missedHighValue.toLowerCase()}. Behavioral friction: ${patient.friction.toLowerCase()} Recommended action: ${patient.aiRecommendation}`
 }
 
 function createTags(patient: Patient) {
@@ -22,16 +22,16 @@ export function AiSummary({ patient }: { patient: Patient }) {
           </div>
           <div className="leading-tight">
             <h2 className="text-sm font-semibold text-foreground">
-              AI sammanfattning
+              AI Summary
             </h2>
             <p className="text-xs text-muted-foreground">
-              {patient.name} · filtrerad från patientens vardag
+              {patient.name} · filtered from patient's daily data
             </p>
           </div>
         </div>
         <span className="flex items-center gap-1 rounded-full border border-[#BCE9E2] bg-[#F0FAF8] px-2.5 py-1 text-[11px] font-medium text-[#078C7A]">
           <ShieldCheck className="size-3" />
-          Granskad av läkare
+          Reviewed by clinician
         </span>
       </div>
 
@@ -53,7 +53,7 @@ export function AiSummary({ patient }: { patient: Patient }) {
       <div className="mt-auto border-t border-[#EEE9E4] pt-5">
         <div className="flex-1 rounded-xl bg-[#F0FAF8] px-3.5 py-3">
           <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-            Nästa kliniska åtgärd
+            Next Clinical Action
           </p>
           <p className="mt-1 text-sm font-medium text-foreground">
             {patient.suggestedAction}

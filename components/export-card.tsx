@@ -7,23 +7,23 @@ import type { Patient } from "@/lib/clinic-data"
 function createExportSections(patient: Patient) {
   return [
     {
-      label: "Sammanfattning",
-      body: `${patient.name}, ${patient.age} år. Kontinuitetsindex ${patient.adherence} % (7 dagar). ${patient.signal} signal. Program: ${patient.program}.`,
+      label: "Summary",
+      body: `${patient.name}, ${patient.age} y/o. Continuity index ${patient.adherence}% (7 days). ${patient.signal} signal. Program: ${patient.program}.`,
     },
     {
-      label: "Missade åtgärder",
+      label: "Missed Actions",
       body: patient.missedActions.join(", "),
     },
     {
-      label: "Föreslagen klinisk åtgärd",
+      label: "Suggested Clinical Action",
       body: patient.aiRecommendation,
     },
     {
-      label: "Uppföljning",
+      label: "Follow-up",
       body:
-        patient.signal === "Kritisk"
-          ? "Ny avstämning inom 48 timmar. Eskalera vid fortsatt lågt kontinuitetsindex."
-          : "Ny avstämning om 7 dagar eller tidigare vid försämrad signal.",
+        patient.signal === "Critical"
+          ? "New check-in within 48 hours. Escalate if continuity index remains low."
+          : "New check-in in 7 days or sooner if signal deteriorates.",
     },
   ]
 }
@@ -49,7 +49,7 @@ export function ExportCard({ patient }: { patient: Patient }) {
         </div>
         <div className="leading-tight">
           <h2 className="text-sm font-semibold text-foreground">
-            Export till journalsystem
+            Journal Note Draft
           </h2>
         </div>
       </div>
@@ -72,12 +72,12 @@ export function ExportCard({ patient }: { patient: Patient }) {
         {copied ? (
           <>
             <Check className="size-4 text-teal" />
-            Kopierad
+            Copied
           </>
         ) : (
           <>
             <Copy className="size-4" />
-            Kopiera strukturerad sammanfattning
+            Copy structured summary
           </>
         )}
       </button>

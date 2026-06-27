@@ -48,7 +48,7 @@ export function Dashboard() {
       }
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Kunde inte hämta livekontinuitet."
+        err instanceof Error ? err.message : "Could not fetch live continuity."
       setLiveError(message)
     } finally {
       setRefreshingPatientId((current) => (current === patientId ? null : current))
@@ -83,7 +83,7 @@ export function Dashboard() {
 
             {liveError ? (
               <div className="rounded-xl border border-[#F7D982] bg-[#FFF0C7] px-4 py-3 text-sm font-medium text-[#9A4B22]">
-                Livekontinuitet kunde inte hämtas: {liveError}
+                Live continuity could not be fetched: {liveError}
               </div>
             ) : null}
 
@@ -134,9 +134,9 @@ export function Dashboard() {
 }
 
 function formatSentAt(sentToAppAt: string | null) {
-  if (!sentToAppAt) return "Skickad tid saknas"
+  if (!sentToAppAt) return "Sent time missing"
 
-  return new Intl.DateTimeFormat("sv-SE", {
+  return new Intl.DateTimeFormat("en-US", {
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
@@ -164,17 +164,17 @@ function ActivePlanSummary({
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-[#078C7A]">
-              Aktiv patientplan
+              Active Patient Plan
             </p>
             <h2 className="mt-1 text-xl font-bold tracking-tight text-[#27221F]">
-              {live?.activePlanTitle ?? `Ingen aktiv patientplan för ${patientName}`}
+              {live?.activePlanTitle ?? `No active patient plan for ${patientName}`}
             </h2>
             <p className="mt-1 text-sm text-[#817771]">
               {live
                 ? live.sentToAppAt
-                  ? `Skickad till ${patientName}s app ${formatSentAt(live.sentToAppAt)}`
-                  : `Skickad till ${patientName}s app`
-                : "Skapa och skicka en plan för att visa den i patientens app."}
+                  ? `Sent to ${patientName}'s app ${formatSentAt(live.sentToAppAt)}`
+                  : `Sent to ${patientName}'s app`
+                : "Create and send a plan to display it in the patient's app."}
             </p>
           </div>
         </div>
@@ -184,7 +184,7 @@ function ActivePlanSummary({
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="rounded-xl bg-[#FBFAF8] px-4 py-3">
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-[#817771]">
-                  Klara
+                  Done
                 </p>
                 <p className="mt-1 text-lg font-bold text-[#27221F]">
                   {live.completedActionCount}/{live.activeActionCount}
@@ -192,7 +192,7 @@ function ActivePlanSummary({
               </div>
               <div className="rounded-xl bg-[#FBFAF8] px-4 py-3">
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-[#817771]">
-                  Kontinuitetsindex
+                  Continuity Index
                 </p>
                 <p className="mt-1 text-lg font-bold text-[#27221F]">
                   {live.adherence} %
@@ -200,7 +200,7 @@ function ActivePlanSummary({
               </div>
               <div className="rounded-xl bg-[#FBFAF8] px-4 py-3">
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-[#817771]">
-                  Senast
+                  Last
                 </p>
                 <p className="mt-1 text-sm font-bold text-[#27221F]">
                   {live.lastCheckIn}
@@ -210,7 +210,7 @@ function ActivePlanSummary({
           ) : (
             <div className="flex items-center gap-2 rounded-xl bg-[#FFF0C7] px-4 py-3 text-sm font-semibold text-[#9A4B22]">
               <CheckCircle2 className="size-4" />
-              Väntar på skickad plan
+              Waiting for sent plan
             </div>
           )}
 
@@ -220,7 +220,7 @@ function ActivePlanSummary({
             className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#27221F] px-4 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
           >
             <RefreshCw className={`size-4 ${refreshing ? "animate-spin" : ""}`} />
-            {refreshing ? "Uppdaterar..." : "Uppdatera index"}
+            {refreshing ? "Updating..." : "Update index"}
           </button>
         </div>
       </div>

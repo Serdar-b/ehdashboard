@@ -1,4 +1,4 @@
-﻿import { Analytics } from '@vercel/analytics/next'
+import { Analytics } from '@vercel/analytics/next'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
@@ -10,9 +10,9 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Executive Health — Klinisk uppföljning',
+  title: 'Protocol to Adherence — Clinical Follow-up',
   description:
-    'Protocol to Adherence-plattform för Executive Health. Omvandlar läkarråd till dagliga patientåtgärder, mäter kontinuitetsindex och visar filtrerade kliniska signaler.',
+    'Protocol to Adherence platform. Transforms clinical notes into daily patient actions, measures continuity index, and displays filtered clinical signals.',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -40,7 +40,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="sv"
+      lang="en"
       className={`${geistSans.variable} ${geistMono.variable} bg-background`}
     >
       <body className="font-sans antialiased">

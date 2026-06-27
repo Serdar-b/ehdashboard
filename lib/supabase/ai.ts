@@ -9,7 +9,7 @@ async function getFunctionErrorMessage(error: unknown) {
   const fallback =
     error instanceof Error
       ? error.message
-      : "AI-funktionen returnerade ett okänt fel."
+      : "The AI function returned an unknown error."
   const context = (error as { context?: Response } | null)?.context
 
   if (!context) {
@@ -61,7 +61,7 @@ export async function generateCarePlanWithAi({
   }
 
   if (!data?.plan?.actions?.length) {
-    throw new Error("AI-funktionen returnerade inga åtgärder.")
+    throw new Error("The AI function returned no actions.")
   }
 
   return data.plan

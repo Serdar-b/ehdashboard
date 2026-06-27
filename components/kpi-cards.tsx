@@ -76,7 +76,7 @@ export function KpiCards() {
 
       <div className="rounded-xl bg-white p-6 shadow-[0_16px_38px_rgba(59,42,32,0.035)]">
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-[#27221F]">Kontinuitetsindex</h2>
+          <h2 className="text-lg font-bold text-[#27221F]">Continuity Index</h2>
         </div>
         <div className="relative h-[210px] overflow-hidden">
           <div className="absolute inset-0 flex flex-col justify-between py-1">
@@ -115,7 +115,7 @@ export function KpiCards() {
             78 % index
           </div>
           <div className="absolute inset-x-12 bottom-0 flex justify-between text-[11px] text-[#817771]">
-            {["Lör", "Sön", "Mån", "Tis", "Ons", "Tor", "Fre"].map((day) => (
+            {["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"].map((day) => (
               <span key={day}>{day}</span>
             ))}
           </div>

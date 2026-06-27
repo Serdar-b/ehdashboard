@@ -1,29 +1,29 @@
-﻿import { AlertTriangle, Brain, TrendingDown, TrendingUp, ShieldCheck } from "lucide-react"
+import { AlertTriangle, Brain, TrendingDown, TrendingUp, ShieldCheck } from "lucide-react"
 import type { Patient } from "@/lib/clinic-data"
 import { StatusBadge } from "@/components/status-badge"
 import { Sparkline } from "@/components/sparkline"
 
 const signalAccent: Record<Patient["signal"], string> = {
-  Stabil: "var(--teal)",
-  Bevaka: "var(--amber)",
-  Kritisk: "var(--coral)",
+  Stable: "var(--teal)",
+  Monitor: "var(--amber)",
+  Critical: "var(--coral)",
 }
 
 const alertTone: Record<Patient["signal"], string> = {
-  Stabil: "border-teal/25 bg-teal-muted/50 text-teal",
-  Bevaka: "border-amber/30 bg-amber-muted/60 text-amber-foreground",
-  Kritisk: "border-coral/25 bg-coral-muted/60 text-coral",
+  Stable: "border-teal/25 bg-teal-muted/50 text-teal",
+  Monitor: "border-amber/30 bg-amber-muted/60 text-amber-foreground",
+  Critical: "border-coral/25 bg-coral-muted/60 text-coral",
 }
 
 const dotTone: Record<Patient["signal"], string> = {
-  Stabil: "bg-teal",
-  Bevaka: "bg-amber",
-  Kritisk: "bg-coral",
+  Stable: "bg-teal",
+  Monitor: "bg-amber",
+  Critical: "bg-coral",
 }
 
 export function PatientDetail({ patient }: { patient: Patient }) {
   const stroke = signalAccent[patient.signal]
-  const positive = patient.signal === "Stabil"
+  const positive = patient.signal === "Stable"
   const trendUp = patient.weekAdherence.at(-1)! >= patient.weekAdherence.at(-2)!
 
   return (
@@ -38,7 +38,7 @@ export function PatientDetail({ patient }: { patient: Patient }) {
               {patient.name}
             </h2>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              {patient.age} år · {patient.program}
+              {patient.age} y/o · {patient.program}
             </p>
           </div>
         </div>
@@ -59,7 +59,7 @@ export function PatientDetail({ patient }: { patient: Patient }) {
       <div>
         <div className="mb-2.5 flex items-center justify-between">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            7-dagars kontinuitetsindex
+            7-day continuity index
           </p>
           <span className="flex items-center gap-1 text-sm font-semibold tabular-nums text-foreground">
             {trendUp ? (
@@ -72,7 +72,7 @@ export function PatientDetail({ patient }: { patient: Patient }) {
         </div>
         <Sparkline data={patient.weekAdherence} stroke={stroke} fill={stroke} />
         <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground">
-          {["Mån", "Tis", "Ons", "Tor", "Fre", "Lör", "Sön"].map((d) => (
+          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
             <span key={d}>{d}</span>
           ))}
         </div>
@@ -80,7 +80,7 @@ export function PatientDetail({ patient }: { patient: Patient }) {
 
       <div>
         <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Missade åtgärder
+          Missed Actions
         </p>
         <ul className="space-y-1.5">
           {patient.missedActions.map((a) => (
@@ -100,7 +100,7 @@ export function PatientDetail({ patient }: { patient: Patient }) {
 
       <div className="rounded-xl bg-[#FBFAF8] px-3.5 py-3">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Beteendefriktion
+          Behavioral Friction
         </p>
         <p className="mt-1.5 text-sm leading-relaxed text-foreground">
           {"\u201C"}
@@ -113,7 +113,7 @@ export function PatientDetail({ patient }: { patient: Patient }) {
         <div className="mb-1.5 flex items-center gap-1.5">
           <Brain className="size-4 text-info" />
           <p className="text-xs font-semibold uppercase tracking-wide text-info">
-            Klinisk rekommendation
+            Clinical Recommendation
           </p>
         </div>
         <p className="text-sm leading-relaxed text-foreground">

@@ -17,18 +17,18 @@ import { saveGeneratedPlan } from "@/lib/supabase/protocol"
 import { cn } from "@/lib/utils"
 
 const example =
-  "Patienten ska promenera zon 2 fem gånger i veckan, ta omega-3 dagligen med mat och logga blodtryck tre morgnar per vecka."
+  "The patient should do zone 2 walks five times a week, take omega-3 daily with food, and log blood pressure three mornings per week."
 
 const priorityStyle: Record<GeneratedAction["priority"], string> = {
-  Hög: "bg-coral-muted text-coral",
-  Medel: "bg-amber-muted text-amber-foreground",
-  Låg: "bg-secondary text-secondary-foreground",
+  High: "bg-coral-muted text-coral",
+  Medium: "bg-amber-muted text-amber-foreground",
+  Low: "bg-secondary text-secondary-foreground",
 }
 
 const emptyAction: GeneratedAction = {
   title: "",
   cadence: "",
-  priority: "Medel",
+  priority: "Medium",
   category: "check-in",
   estimatedMinutes: undefined,
   clinicalWeight: undefined,
@@ -40,11 +40,11 @@ const categoryOptions: Array<{
   value: NonNullable<GeneratedAction["category"]>
   label: string
 }> = [
-  { value: "movement", label: "Rörelse" },
-  { value: "nutrition", label: "Kost" },
-  { value: "medication", label: "Läkemedel" },
-  { value: "measurement", label: "Mätning" },
-  { value: "check-in", label: "Avstämning" },
+  { value: "movement", label: "Movement" },
+  { value: "nutrition", label: "Nutrition" },
+  { value: "medication", label: "Medication" },
+  { value: "measurement", label: "Measurement" },
+  { value: "check-in", label: "Check-in" },
 ]
 
 type PlanComposerProps = {
@@ -58,6 +58,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
   const [editingPlan, setEditingPlan] = useState(false)
   const [editingActionIndex, setEditingActionIndex] = useState<number | null>(null)
   const [generated, setGenerated] = useState(false)
+  const [generatedWithAi, setGeneratedWithAi] = useState(false)
   const [sent, setSent] = useState(false)
   const [sending, setSending] = useState(false)
   const [confirmation, setConfirmation] = useState("")
@@ -112,6 +113,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
   async function handleGenerate() {
     setLoading(true)
     setGenerated(false)
+    setGeneratedWithAi(false)
     setSent(false)
     setEditingPlan(false)
     setEditingActionIndex(null)
@@ -120,9 +122,11 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
 
     try {
       let plan: GeneratedPlan
+      let usedAi = false
 
       try {
         plan = await generateCarePlanWithAi({ note, patient })
+        usedAi = true
       } catch {
         await new Promise((resolve) => setTimeout(resolve, 900))
         plan = generateDemoCarePlan(note, patient)
@@ -131,13 +135,14 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
       const { actions: generatedActions, ...details } = plan
       setPlanDetails(details)
       setActions(generatedActions)
+      setGeneratedWithAi(usedAi)
       setLoading(false)
       setGenerated(true)
     } catch (err) {
       const message =
         err instanceof Error
           ? err.message
-          : "Kunde inte generera mikrohandlingar med AI-funktionen."
+          : "Could not generate micro-actions with the AI function."
       setError(message)
       setLoading(false)
     }
@@ -145,7 +150,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
 
   async function handleSend() {
     if (hasInvalidPlan || hasInvalidActions || !planDetails) {
-      setError("Planen måste ha titel, mål, riskområde, längd och kompletta åtgärder före utskick.")
+      setError("The plan must have a title, goal, risk area, duration, and complete actions before sending.")
       return
     }
 
@@ -162,7 +167,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
       setConfirmation(createSendConfirmation(patient, actions))
       setSent(true)
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Okänt Supabase-fel."
+      const message = err instanceof Error ? err.message : "Unknown Supabase error."
       setError(message)
     } finally {
       setSending(false)
@@ -177,10 +182,10 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
         </div>
         <div className="leading-tight">
           <h2 className="text-sm font-semibold text-foreground">
-            Läkarens AI-input
+            Doctor's AI Input
           </h2>
           <p className="text-md text-muted-foreground">
-            Journalanteckningen omvandlas till strukturerade dagliga mikrohandlingar
+            Clinical notes are transformed into structured daily micro-actions
           </p>
         </div>
       </div>
@@ -191,8 +196,8 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
         onChange={(e) => setNote(e.target.value)}
         rows={3}
         className="w-full resize-none rounded-xl border border-[#EEE9E4] bg-[#FBFAF8] p-4 text-sm leading-relaxed text-[#27221F] outline-none placeholder:text-[#A59D97] focus-visible:border-[#078C7A] focus-visible:ring-4 focus-visible:ring-[#078C7A]/10"
-        placeholder="Skriv eller klistra in läkaranteckning..."
-        aria-label="Läkaranteckning"
+        placeholder="Type or paste a clinical note..."
+        aria-label="Clinical note"
       />
 
       <button
@@ -205,7 +210,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
         ) : (
           <Sparkles className="size-4" />
         )}
-        {loading ? "Genererar..." : "Generera mikrohandlingar"}
+        {loading ? "Generating..." : "Generate micro-actions"}
       </button>
 
       {error && !generated ? (
@@ -225,15 +230,19 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
           )}
         >
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-[#078C7A]">
-              AI-förslag
-            </p>
-            <h3 className="mt-1 text-lg font-bold text-[#27221F]">
-              {planDetails?.title ?? `${patient.name}s dagliga plan`}
+            {generatedWithAi ? (
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-[#078C7A]">
+                AI Suggestion
+              </p>
+            ) : null}
+            <h3
+              className={cn(
+                "text-lg font-bold text-[#27221F]",
+                generatedWithAi && "mt-1",
+              )}
+            >
+              {planDetails?.title ?? `${patient.name}'s daily plan`}
             </h3>
-            <p className="mt-1 text-xs text-[#3C6761]">
-              {actions.length} mikrohandlingar · granska och skicka när planen känns rätt
-            </p>
           </div>
           <button
             type="button"
@@ -245,7 +254,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
             className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-[#BCE9E2] bg-white px-4 py-2.5 text-sm font-semibold text-[#078C7A] transition-colors hover:bg-[#F7F7F8] disabled:opacity-50"
           >
             <Pencil className="size-4" />
-            {editingPlan ? "Stäng planinfo" : "Redigera planinfo"}
+            {editingPlan ? "Close plan info" : "Edit plan info"}
           </button>
         </div>
 
@@ -253,18 +262,18 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
           <div className="rounded-2xl border border-[#E7E2DE] bg-white p-5">
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm font-bold text-[#27221F]">Planinformation</p>
+                <p className="text-sm font-bold text-[#27221F]">Plan Information</p>
                 <p className="mt-1 text-xs text-[#817771]">
-                  Grunduppgifter som visas tillsammans med patientens plan.
+                  Basic details shown alongside the patient's plan.
                 </p>
               </div>
               <span className="shrink-0 rounded-full bg-[#F7F7F8] px-3 py-1.5 text-xs font-semibold text-[#635C57]">
-                {planDetails.durationWeeks} veckor
+                {planDetails.durationWeeks} weeks
               </span>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="text-xs font-semibold text-[#635C57] sm:col-span-2">
-                Plantitel
+                Plan Title
                 <input
                   value={planDetails.title}
                   onChange={(event) => updatePlanDetails({ title: event.target.value })}
@@ -273,7 +282,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                 />
               </label>
               <label className="text-xs font-semibold text-[#635C57] sm:col-span-2">
-                Mål
+                Goal
                 <textarea
                   value={planDetails.goal}
                   onChange={(event) => updatePlanDetails({ goal: event.target.value })}
@@ -283,7 +292,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                 />
               </label>
               <label className="text-xs font-semibold text-[#635C57]">
-                Riskområde
+                Risk Area
                 <input
                   value={planDetails.riskArea}
                   onChange={(event) => updatePlanDetails({ riskArea: event.target.value })}
@@ -292,7 +301,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                 />
               </label>
               <label className="text-xs font-semibold text-[#635C57]">
-                Längd (veckor)
+                Duration (weeks)
                 <input
                   type="number"
                   min={1}
@@ -306,7 +315,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                 />
               </label>
               <label className="text-xs font-semibold text-[#635C57] sm:col-span-2">
-                Sammanfattning till patienten
+                Patient Summary
                 <textarea
                   value={planDetails.summary}
                   onChange={(event) => updatePlanDetails({ summary: event.target.value })}
@@ -322,11 +331,9 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
         <div className="mt-4 flex items-center justify-between gap-3 px-1">
           <div>
             <p className="text-sm font-bold text-[#27221F]">
-              Mikrohandlingar
+              Micro-actions
             </p>
-            <p className="mt-1 text-xs text-[#817771]">
-              Ändra bara det som behöver justeras före utskick.
-            </p>
+
           </div>
           <button
             type="button"
@@ -335,7 +342,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
             className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[#D8D1CB] bg-white px-3 py-2 text-xs font-semibold text-foreground hover:bg-[#FBFAF8] disabled:opacity-50"
           >
             <Plus className="size-3.5" />
-            Lägg till handling
+            Add action
           </button>
         </div>
         {actions.map((action, i) => {
@@ -355,7 +362,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                   <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-[#817771]">
                     <span>{action.cadence}</span>
                     <span aria-hidden>·</span>
-                    <span>{action.priority} prioritet</span>
+                    <span>{action.priority} priority</span>
                   </div>
                 </div>
                 <button
@@ -368,7 +375,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                   className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-[#E7E2DE] bg-[#FBFAF8] px-3 py-2 text-xs font-semibold text-[#635C57] hover:border-[#BCE9E2] hover:text-[#078C7A] disabled:opacity-50"
                 >
                   <Pencil className="size-3.5" />
-                  Redigera
+                  Edit
                 </button>
               </div>
             )
@@ -386,10 +393,10 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                   </span>
                   <div className="min-w-0">
                     <p className="text-[11px] font-semibold uppercase tracking-wide text-[#817771]">
-                      Mikrohandling
+                      Micro-action
                     </p>
                     <p className="truncate text-sm font-semibold text-[#27221F]">
-                      {action.title || `Handling ${i + 1}`}
+                      {action.title || `Action ${i + 1}`}
                     </p>
                   </div>
                 </div>
@@ -399,7 +406,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                     onClick={() => setEditingActionIndex(null)}
                     className="rounded-lg border border-[#E7E2DE] bg-[#FBFAF8] px-3 py-2 text-xs font-semibold text-[#635C57] hover:text-[#078C7A]"
                   >
-                    Stäng
+                    Close
                   </button>
                   <button
                     type="button"
@@ -408,7 +415,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                       setEditingActionIndex(null)
                     }}
                     disabled={sent || sending}
-                    aria-label={`Ta bort mikrohandling ${i + 1}`}
+                    aria-label={`Remove micro-action ${i + 1}`}
                     className="rounded-lg p-2 text-muted-foreground hover:bg-coral-muted hover:text-coral disabled:opacity-50"
                   >
                     <Trash2 className="size-4" />
@@ -417,7 +424,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="text-xs font-semibold text-[#635C57] sm:col-span-2">
-                  Titel
+                  Title
                   <input
                     value={action.title}
                     onChange={(event) => updateAction(i, { title: event.target.value })}
@@ -426,7 +433,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                   />
                 </label>
                 <label className="text-xs font-semibold text-[#635C57]">
-                  Frekvens / tidpunkt
+                  Frequency / timing
                   <input
                     value={action.cadence}
                     onChange={(event) => updateAction(i, { cadence: event.target.value })}
@@ -435,7 +442,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                   />
                 </label>
                 <label className="text-xs font-semibold text-[#635C57]">
-                  Prioritet
+                  Priority
                   <select
                     value={action.priority}
                     onChange={(event) =>
@@ -453,11 +460,11 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                 </label>
                 <div className="border-t border-[#EEE9E4] pt-4 sm:col-span-2">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-[#817771]">
-                    Fler inställningar
+                    More settings
                   </p>
                 </div>
                 <label className="text-xs font-semibold text-[#635C57]">
-                  Kategori
+                  Category
                   <select
                     value={action.category ?? "check-in"}
                     onChange={(event) =>
@@ -474,7 +481,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                   </select>
                 </label>
                 <label className="text-xs font-semibold text-[#635C57]">
-                  Uppskattad tid (minuter)
+                  Estimated time (minutes)
                   <input
                     type="number"
                     min={0}
@@ -491,7 +498,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                   />
                 </label>
                 <label className="text-xs font-semibold text-[#635C57]">
-                  Klinisk vikt
+                  Clinical weight
                   <input
                     type="number"
                     min={0}
@@ -508,7 +515,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                   />
                 </label>
                 <label className="text-xs font-semibold text-[#635C57] sm:col-span-2">
-                  Förklaring till patienten
+                  Patient explanation
                   <textarea
                     value={action.patientReason ?? ""}
                     onChange={(event) => updateAction(i, { patientReason: event.target.value })}
@@ -518,7 +525,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
                   />
                 </label>
                 <label className="text-xs font-semibold text-[#635C57] sm:col-span-2">
-                  Hur åtgärden verifieras
+                  How the action is verified
                   <input
                     value={action.verificationMethod ?? ""}
                     onChange={(event) =>
@@ -537,12 +544,12 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
           <div className="mt-4 flex flex-col gap-3 rounded-xl border border-[#BCE9E2] bg-[#F0FAF8] p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold text-[#078C7A]">
-                {sent ? "Plan skickad till patientappen" : "Plan redo att skickas"}
+                {sent ? "Plan sent to patient app" : "Plan ready to send"}
               </p>
               <p className="mt-1 text-xs leading-relaxed text-[#3C6761]">
                 {sent
                   ? confirmation
-                  : `${actions.length} åtgärder kan nu skickas till ${patient.name}s app.`}
+                  : `${actions.length} actions can now be sent to ${patient.name}'s app.`}
               </p>
               {error ? (
                 <p className="mt-2 text-xs font-medium leading-relaxed text-coral">
@@ -562,7 +569,7 @@ export function PlanComposer({ patient, onPlanSent }: PlanComposerProps) {
               ) : (
                 <Send className="size-4" />
               )}
-              {sending ? "Skickar..." : sent ? "Skickad" : "Skicka till patientapp"}
+              {sending ? "Sending..." : sent ? "Sent" : "Send to patient app"}
             </button>
           </div>
         ) : null}
